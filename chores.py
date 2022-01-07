@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+
+import json, boto.ses
+from datetime import datetime
+from flask import Flask, render_template, request
+from email.message import Message
+
+with open('chores.json') as choresjson:
+    status = json.load(choresjson)
+
+app = Flask(__name__)
+fmt = '%a, %d %b %Y %H:%M:%S %z'
+
+@app.route('/')
+def displaychores():
+    chores = []
+    names = status["order"]
+    for k in status:
+        if k not in ["order", "emails", "descriptions"]:
+            chores.append(k)
+    return render_template('chores.html', chores=chores, names=names)
+
+@app.route('/nag/<chore>', methods=["POST"])
+def nag(chore):
+    if chore in ["order", "emails", "descriptions"] or chore not in status:
+        return "Invalid chore, loser."
+    doer = status["order"][0]
+    for name in status["order"]:
+        if status[chore][doer] > status[chore][name]:
+            doer = name
+    msg = Message()
+    subject = ''
+    if chore in status["descriptions"]:
+        subject = "%s NEEDS TO DO THE %s" % (doer, chore)
+        msg.set_payload(status["descriptions"][chore])
+    else:
+        subject = "%s NEEDS TO DO THE %s (eom)" % (doer, chore)
+    msg['Subject'] = subject
+    msg['Date'] = datetime.now().strftime(fmt)
+    msg['From'] = "Chore Master <address@todo.fixme>"
+    msg['To'] = status["emails"][doer]
+    msg['Cc'] = "" # TODO change before release
+    msg['Reply-To'] = ""
+    msg.preamble = "\n"
+    conn = boto.ses.connect_to_region('us-east-1')
+    conn.send_raw_email(msg.as_string())
+    conn.close()
+    return """<!doctype html>
+<html><head></head><body>%s has been nagged to %s.<script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script></body></html>""" % (doer, chore, request.url_root)
+
+@app.route('/done/<chore>', methods=["POST"])
+def done(chore):
+    if chore in ["order", "emails", "descriptions"] or chore not in status:
+        return "Invalid chore, COMMIE."
+    try:
+        if request.form['doer'] not in status["order"]:
+            return "Invalid person, dickhead."
+    except KeyError:
+        return "Bad form, SNOZZBALL."
+    status[chore][request.form['doer']] += 1
+    with open('chores.json', 'w') as choresjson:
+        json.dump(status, choresjson)
+    msg = Message()
+    msg['Subject'] = "%s %sed. Thanks. (eom)" % (request.form['doer'], chore)
+    msg['Date'] = datetime.now().strftime(fmt)
+    msg['From'] = "Hodgepodge Chore Master <address@todo.fixme>"
+    msg['To'] = status["emails"][request.form['doer']]
+    msg['Cc'] = "" # TODO change before release
+    msg['Reply-To'] = ""
+    msg.preamble = "\n"
+    conn = boto.ses.connect_to_region('us-east-1')
+    conn.send_raw_email(msg.as_string())
+    conn.close()
+    return """<!doctype html>
+<html><head></head><body>Thanks.<script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script></body></html>""" % request.url_root
+
+if __name__ == '__main__':
+    app.run(debug=False, host='0.0.0.0', port=9001)

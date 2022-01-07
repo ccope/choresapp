@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>HOUSE CHORES</title>
+</head>
+<body>
+  <h1>DOING THE CHORES</h1>
+  {% for chore in chores %}
+  <form action="/nag/{{ chore }}" method="post">
+    <input type="submit" value="Nag about {{ chore }}">
+  </form>
+  <form action="/done/{{ chore}}" method="post">
+    (Mark chore done by:)
+    {% for name in names %}
+    <label for="{{ chore }}-{{ name }}"> 
+    <input type="radio" name="doer" value="{{ name }}" id="{{ chore }}-{{ name }}">
+    {{ name }}
+    </label>
+    {% endfor %}
+    <input type="submit" value="did the {{ chore }}">
+  </form>
+  <br>
+  {% endfor %}
+</body>
+</html>
+  

@@ -1,0 +1,2 @@
+#!/bin/bash
+wget --post-data="" http://127.0.0.1:9001/nag/bathroom >> /dev/null
