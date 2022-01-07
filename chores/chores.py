@@ -7,7 +7,7 @@ from email.message import Message
 import boto.ses
 from flask import Flask, render_template, request
 
-with open('chores.json') as choresjson:
+with open('data/chores.json') as choresjson:
     status = json.load(choresjson)
 
 app = Flask(__name__)
