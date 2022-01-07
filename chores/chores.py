@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-import json, boto.ses
+import json
 from datetime import datetime
-from flask import Flask, render_template, request
 from email.message import Message
+
+import boto.ses
+from flask import Flask, render_template, request
 
 with open('chores.json') as choresjson:
     status = json.load(choresjson)
