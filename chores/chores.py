@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import json
+import os
 from datetime import datetime
 from email.message import Message
 
@@ -10,7 +11,8 @@ from flask import Flask, render_template, request
 with open('data/chores.json') as choresjson:
     status = json.load(choresjson)
 
-app = Flask(__name__)
+template_dir = os.path.abspath('templates')
+app = Flask(__name__, template_folder=template_dir)
 fmt = '%a, %d %b %Y %H:%M:%S %z'
 
 @app.route('/')
