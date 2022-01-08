@@ -4,24 +4,33 @@
   <meta charset="utf-8"/>
   <title>HOUSE CHORES</title>
 </head>
-<body>
-  <h1>DOING THE CHORES</h1>
-  {% for chore in chores %}
-  <form action="/nag/{{ chore }}" method="post">
-    <input type="submit" value="Nag about {{ chore }}">
-  </form>
-  <form action="/done/{{ chore}}" method="post">
-    (Mark chore done by:)
-    {% for name in names %}
-    <label for="{{ chore }}-{{ name }}"> 
-    <input type="radio" name="doer" value="{{ name }}" id="{{ chore }}-{{ name }}">
-    {{ name }}
-    </label>
+<body style="font-size:2vh;">
+  <h1 style="font-size:8vh;">DOING THE CHORES</h1>
+  Nag about:
+  <form action="/nag" method="post">
+    <select name="chore" style="font-size:2vh;">
+    {% for chore in chores %}
+      <option value="{{ chore }}">{{ chore }}</option>
     {% endfor %}
-    <input type="submit" value="did the {{ chore }}">
+    </select>
+    <input type="submit" value="Nag!" style="font-size:2vh;">
   </form>
-  <br>
-  {% endfor %}
+  <br />
+  <br />
+  Mark that:
+  <form action="/done" method="post">
+    <select name="name" style="font-size:2vh;">
+    {% for name in names %}
+    <option value="{{ name }}">{{ name }}</option>
+    {% endfor %}
+    </select>
+    did the:
+    <select name="chore" style="font-size:2vh;">
+    {% for chore in chores %}
+    <option value="{{ chore }}">{{ chore }}</option>
+    {% endfor %}
+    <input type="submit" value="Done!" style="font-size:2vh;">
+  </form>
 </body>
 </html>
   

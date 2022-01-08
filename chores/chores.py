@@ -24,8 +24,9 @@ def displaychores():
             chores.append(k)
     return render_template('chores.html', chores=chores, names=names)
 
-@app.route('/nag/<chore>', methods=["POST"])
-def nag(chore):
+@app.route('/nag', methods=["POST"])
+def nag():
+    chore = request.form['chore']
     if chore in ["order", "emails", "descriptions"] or chore not in status:
         return "Invalid chore, loser."
     doer = status["order"][0]
@@ -52,8 +53,9 @@ def nag(chore):
     return """<!doctype html>
 <html><head></head><body>%s has been nagged to %s.<script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script></body></html>""" % (doer, chore, request.url_root)
 
-@app.route('/done/<chore>', methods=["POST"])
-def done(chore):
+@app.route('/done', methods=["POST"])
+def done():
+    chore = request.form['chore']
     if chore in ["order", "emails", "descriptions"] or chore not in status:
         return "Invalid chore, COMMIE."
     try:
