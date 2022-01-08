@@ -59,18 +59,18 @@ def done():
     if chore in ["order", "emails", "descriptions"] or chore not in status:
         return "Invalid chore, COMMIE."
     try:
-        if request.form['doer'] not in status["order"]:
+        if request.form['name'] not in status["order"]:
             return "Invalid person, dickhead."
     except KeyError:
         return "Bad form, SNOZZBALL."
-    status[chore][request.form['doer']] += 1
+    status[chore][request.form['name']] += 1
     with open('chores.json', 'w') as choresjson:
         json.dump(status, choresjson)
     msg = Message()
-    msg['Subject'] = "%s %sed. Thanks. (eom)" % (request.form['doer'], chore)
+    msg['Subject'] = "%s %sed. Thanks. (eom)" % (request.form['name'], chore)
     msg['Date'] = datetime.now().strftime(fmt)
     msg['From'] = "Hodgepodge Chore Master <address@todo.fixme>"
-    msg['To'] = status["emails"][request.form['doer']]
+    msg['To'] = status["emails"][request.form['name']]
     msg['Cc'] = "" # TODO change before release
     msg['Reply-To'] = ""
     msg.preamble = "\n"
