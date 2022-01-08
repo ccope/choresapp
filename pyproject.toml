@@ -6,7 +6,7 @@ authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 
 [tool.poetry.dependencies]
 boto = "^2.35.2"
-flask = "^0.10.1"
+flask = "^2.0"
 python = "~3.7.0"
 
 [tool.poetry.dev-dependencies]
@@ -16,7 +16,6 @@ pylsp-mypy = '^0.5.7'
 python-lsp-black = '^1.0.1'
 python-lsp-jsonrpc = '^1.0.0'
 python-lsp-server = '^1.3.3'
-types-flask = "^1.1.6"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
