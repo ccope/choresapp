@@ -8,6 +8,8 @@ authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 boto = "^2.35.2"
 flask = "^2.0"
 python = "~3.7.0"
+SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
+alembic = "^1.7.6"
 
 [tool.poetry.dev-dependencies]
 mypy = "^0.931"
