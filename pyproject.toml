@@ -5,14 +5,21 @@ description = ""
 authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 
 [tool.poetry.dependencies]
-boto = "^2.35.2"
+boto3 = "^1.21.8"
 flask = "^2.0"
+google-api-python-client = "^2.39"
+google-auth-httplib2 = "^0.1"
+google-auth-oauthlib = "^0.4.6"
 python = "~3.7.0"
 SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
 alembic = "^1.7.6"
 
 [tool.poetry.dev-dependencies]
+boto3-stubs = {extras = ["ses"], version = "^1.21.8"}
+google-api-python-client-stubs = { path = "/home/cam/repos/github/ccope/google-api-python-client-stubs/", develop = true }
+google-auth-stubs = "^0.1.0"
 mypy = "^0.931"
+mypy-boto3 = "^1.21.8"
 pytest = "^5.2"
 pylsp-mypy = '^0.5.7'
 python-lsp-black = '^1.0.1'
