@@ -2,7 +2,7 @@ import boto3
 
 from mypy_boto3_ses import SESClient
 
-from chores.email import EmailProvider
+from chores.email_service import EmailProvider
 
 
 class SesEmail(EmailProvider):

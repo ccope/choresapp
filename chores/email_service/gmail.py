@@ -7,7 +7,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from chores.email import EmailProvider
+from chores.email_service import EmailProvider
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send/"]
 
