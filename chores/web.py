@@ -1,10 +1,15 @@
 import os
 from datetime import datetime
 from email.message import Message
+from textwrap import dedent
+from typing import Dict, Tuple
 
-from flask import Flask, render_template, request, g
-from sqlalchemy.sql import select
+from flask import Flask, render_template, request
+from flask_sqlalchemy_session import current_session
+from sqlalchemy.sql import select, and_
+from sqlalchemy.orm import selectinload
 
+from chores.models.choresdb import Assignments, People, Tasks
 
 template_dir = os.path.abspath('templates')
 fmt = '%a, %d %b %Y %H:%M:%S %z'
@@ -13,72 +18,105 @@ app = Flask(__name__, template_folder=template_dir)
 
 @app.route('/')
 def displaychores():
-    stmt = select(Tasks)
-    tasks = g.conn.execute(stmt)
-    chores = []
-    names = []
-    for id, name, description, people in chores:
-        chores.append(name)
-        names.append([x.name for x in people])
-    return render_template('chores.html', chores=chores, names=names)
+    tasks = current_session.execute(select(Tasks.name)).scalars()
+    names = current_session.execute(select(People.name)).scalars()
+    return render_template('chores.html', chores=list(tasks), names=list(names))
 
 
 @app.route('/nag', methods=["POST"])
 def nag():
-    chore = request.form['chore']
-    chores = g.conn.execute()
-    if chore not in [c.name for c in chores]:
-        return "Invalid chore, loser."
-    doer = g.conn.execute(select(Assignments).order_by(Assignments.c.counter, desc()))
-    #doer = config["order"][0]
-    for name in config["order"]:
-        if status[chore][doer] > status[chore][name]:
-            doer = name
+    try:
+        task_name = request.form['chore']
+    except KeyError:
+        raise ValueError("Bad form, SNOZZBALL.")
+    task_obj = current_session.execute(select(Tasks)
+                                       .where(Tasks.name == task_name)
+                                       ).scalars().one()
+    assigned_people = current_session.execute(
+            select(Assignments).options(selectinload(Assignments.person))
+            .where(Assignments.task_id == task_obj.id)
+            .order_by(Assignments.counter.asc())
+            ).scalars().all()
+    person_obj = assigned_people[0].person
+    emails = [p.person.email for p in assigned_people[1:]]
     msg = Message()
-    subject = ''
-    if chore in config["descriptions"]:
-        subject = "%s NEEDS TO DO THE %s" % (doer, chore)
-        msg.set_payload(config["descriptions"][chore])
-    else:
-        subject = "%s NEEDS TO DO THE %s (eom)" % (doer, chore)
+    subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_name)
+    msg.set_payload(task_obj.description)
     msg['Subject'] = subject
     msg['Date'] = datetime.now().strftime(fmt)
     msg['From'] = "Chore Master <address@todo.fixme>"
-    msg['To'] = config["emails"][doer]
-    msg['Cc'] = config["emails"].values() - msg['To']
+    msg['To'] = person_obj.email
+    msg['Cc'] = emails
     msg['Reply-To'] = ""
     msg.preamble = "\n"
-    g.email.send(msg)
-    return """<!doctype html>
-<html><head></head><body>%s has been nagged to %s.<script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script></body></html>""" % (doer, chore, request.url_root)
+    app.config['email'].send(msg)
+    return dedent("""
+        <!doctype html>
+        <html>
+        <head></head>
+        <body>
+        %s has been nagged to %s.
+        <script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script>
+        </body>
+        </html>""" % (person_obj.name, task_name, request.url_root))
+
+
+def validate_web_form(form: Dict[str, str]) -> Tuple[People, Tasks]:
+    try:
+        person_name = form['name']
+        task_name = form['chore']
+    except KeyError:
+        raise ValueError("Bad form, SNOZZBALL.")
+    task_obj = current_session.execute(
+                   select(Tasks)
+                   .where(Tasks.name == task_name)
+                   ).scalars().one()
+    person_obj = current_session.execute(
+                     select(People)
+                     .where(People.name == person_name)
+                     ).scalars().one()
+    if not task_obj:
+        raise ValueError("Invalid chore, COMMIE.")
+    if not person_obj:
+        raise ValueError("Invalid person, dickhead.")
+    a_st = select(Assignments).where(
+            and_(Assignments.people_id == person_obj.id,
+                 Assignments.task_id == task_obj.id))
+    try:
+        assignment = current_session.execute(a_st).scalars().one()
+    except Exception:
+        raise ValueError("That person doesn't have to do that chore, dawg.")
+    return person_obj, task_obj
 
 
 @app.route('/done', methods=["POST"])
 def done():
-    chore = request.form['chore']
-    if chore not in status:
-        return "Invalid chore, COMMIE."
     try:
-        if request.form['name'] not in config["order"]:
-            return "Invalid person, dickhead."
-    except KeyError:
-        return "Bad form, SNOZZBALL."
-    status[chore][request.form['name']] += 1
-    with open('chores.json', 'w') as choresjson:
-        json.dump(status, choresjson)
+        person_obj, task_obj = validate_web_form(request.form)
+    except ValueError as e:
+        return e.msg
+    print(task_obj.people)
+    emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
+    print(emails)
     msg = Message()
-    msg['Subject'] = "%s %sed. Thanks. (eom)" % (request.form['name'], chore)
+    msg['Subject'] = "%s %sed. Thanks. (eom)" % (person_obj.name, task_obj.name)
     msg['Date'] = datetime.now().strftime(fmt)
     msg['From'] = "Chore Master <address@todo.fixme>"
-    msg['To'] = status["emails"][request.form['name']]
-    msg['Cc'] = ""  # TODO change before release
+    msg['To'] = person_obj.email
+    msg['Cc'] = emails
     msg['Reply-To'] = ""
     msg.preamble = "\n"
     try:
-        g.email.send(msg)
+        app.config['email'].send(msg)
     except Exception as e:
         print("failed to email: %s" % e)
-    return """<!doctype html>
-<html><head></head><body>Thanks.<script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script></body></html>""" % request.url_root
-
-
+        return "failed to email %s!" % person_obj.name
+    return dedent("""
+        <!doctype html>
+        <html>
+        <head></head>
+        <body>
+        Thanks.
+        <script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script>
+        </body>
+        </html>""" % request.url_root)
