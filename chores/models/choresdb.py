@@ -38,12 +38,16 @@ class Tasks(Base):
     description = Column(Text)
     people: Mapped[List["Assignments"]] = relationship("Assignments")
 
+
 class Assignments(Base):
     __tablename__ = 'assignments'
 
     task_id = Column(Integer, ForeignKey('tasks.id'), primary_key=True)
     people_id = Column(Integer, ForeignKey('people.id'), primary_key=True)
     counter = Column(Integer, default=0)
+    task: Mapped["Tasks"] = relationship("Tasks", back_populates="people")
+    person: Mapped["People"] = relationship("People", back_populates="tasks")
+
 
 class Timers(Base):
     __tablename__ = 'timers'
