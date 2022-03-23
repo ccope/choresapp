@@ -26,7 +26,7 @@ class People(Base):
     __tablename__ = 'people'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(128), nullable=False)
+    name = Column(String(128), nullable=False, unique=True)
     email = Column(String(128), nullable=False, unique=True)
     tasks: Mapped[List["Assignments"]] = relationship("Assignments")
 
