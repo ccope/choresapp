@@ -2,10 +2,10 @@ import boto3
 
 from mypy_boto3_ses import SESClient
 
-from chores.email_service import EmailProvider
+from chores.notification_service import NotificationProvider
 
 
-class SesEmail(EmailProvider):
+class SesEmail(NotificationProvider):
     def __init__(self):
         self.client: SESClient = boto3.client('ses')
 

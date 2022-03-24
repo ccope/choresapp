@@ -60,7 +60,7 @@ def nag():
     msg['Cc'] = emails
     msg['Reply-To'] = ""
     msg.preamble = "\n"
-    app.config['email'].send(msg)
+    app.config['notifyer'].send(msg)
     return dedent("""
         <!doctype html>
         <html>
@@ -118,7 +118,7 @@ def done():
     msg['Reply-To'] = ""
     msg.preamble = "\n"
     try:
-        app.config['email'].send(msg)
+        app.config['notifyer'].send(msg)
     except Exception as e:
         print("failed to email: %s" % e)
         return "failed to email %s!" % person_obj.name

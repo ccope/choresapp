@@ -2,13 +2,13 @@ from abc import ABCMeta, abstractmethod
 from email.message import Message
 from typing import Optional
 
-class EmailProvider(metaclass=ABCMeta):
+class NotificationProvider(metaclass=ABCMeta):
     @abstractmethod
     def send(self, message: Message):
         pass
 
 
-def get_email_provider(name: Optional[str]) -> EmailProvider:
+def get_notification_provider(name: Optional[str]) -> NotificationProvider:
     if name == "AWS":
         from .aws import SesEmail
         return SesEmail()
@@ -18,4 +18,4 @@ def get_email_provider(name: Optional[str]) -> EmailProvider:
     elif name == "Discord":
         from .discord_post import DiscordMessage
         return DiscordMessage()
-    raise Exception("Invalid email provider!")
+    raise Exception("Invalid notification provider!")

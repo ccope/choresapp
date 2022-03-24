@@ -2,10 +2,10 @@ import os
 from email.message import Message
 from discord.webhook.sync import SyncWebhook
 
-from chores.email_service import EmailProvider
+from chores.notification_service import NotificationProvider
 
 
-class DiscordMessage(EmailProvider):
+class DiscordMessage(NotificationProvider):
 
     def __init__(self):
         WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL')

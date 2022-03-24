@@ -7,11 +7,11 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from chores.email_service import EmailProvider
+from chores.notification_service import NotificationProvider
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.send/"]
 
-class GMailEmail(EmailProvider):
+class GMailEmail(NotificationProvider):
     def __init__(self):
         self.creds = None
         self.service = None

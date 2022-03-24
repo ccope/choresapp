@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_sqlalchemy_session import flask_scoped_session
 
-from chores.email_service import get_email_provider
+from chores.notification_service import get_notification_provider
 #from chores.models.choresdb import Assignments, People, Tasks, Timers
 from chores.web import app
 
@@ -16,7 +16,7 @@ engine = create_engine(os.environ['DBURI'], connect_args={"check_same_thread": F
                        echo=True, future=True)
 SessionFactory = sessionmaker(autoflush=False, bind=engine)
 flask_scoped_session(SessionFactory, app)
-email_provider_name = os.environ.get("NOTIFICATIONS")
-email_provider = get_email_provider(email_provider_name)
-app.config['email'] = email_provider
+notification_provider_name = os.environ.get("NOTIFICATIONS")
+notification_provider = get_notification_provider(notification_provider_name)
+app.config['notifyer'] = notification_provider
 app.run(debug=False, host='0.0.0.0', port=9001)
