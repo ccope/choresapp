@@ -3,7 +3,6 @@ from sqlalchemy import (
         ForeignKey,
         Integer,
         String,
-        Table,
         Text
 )
 from sqlalchemy.orm import (
@@ -14,8 +13,9 @@ from sqlalchemy.orm import (
 from typing import Any, List, TYPE_CHECKING
 
 # TODO: remove when sqlalchemy 2.0 types work properly
-if  TYPE_CHECKING:
+if TYPE_CHECKING:
     from sqlalchemy.orm.decl_api import DeclarativeMeta
+
     class Base(metaclass=DeclarativeMeta):
         __abstract__ = True
 else:
@@ -29,6 +29,7 @@ class People(Base):
     name = Column(String(128), nullable=False, unique=True)
     email = Column(String(128), nullable=False, unique=True)
     tasks: Mapped[List["Assignments"]] = relationship("Assignments")
+
 
 class Tasks(Base):
     __tablename__ = 'tasks'
