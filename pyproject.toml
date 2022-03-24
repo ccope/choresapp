@@ -10,9 +10,11 @@ flask = "^2.0"
 google-api-python-client = "^2.39"
 google-auth-httplib2 = "^0.1"
 google-auth-oauthlib = "^0.4.6"
-python = "~3.7.0"
+py-cord = "2.0.0b5"
+python = "3.10.2"
 SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
 alembic = "^1.7.6"
+requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 boto3-stubs = {extras = ["ses"], version = "^1.21.8"}

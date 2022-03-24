@@ -19,4 +19,7 @@ def get_email_provider(name: Optional[str]) -> EmailProvider:
     elif name == "Google":
         from .gmail import GMailEmail
         return GMailEmail()
+    elif name == "Discord":
+        from .discord_post import DiscordMessage
+        return DiscordMessage()
     raise Exception("Invalid email provider!")
