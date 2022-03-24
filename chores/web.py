@@ -1,4 +1,5 @@
 import os
+import random
 from datetime import datetime
 from email.message import Message
 from textwrap import dedent
@@ -37,8 +38,18 @@ def nag():
             .where(Assignments.task_id == task_obj.id)
             .order_by(Assignments.counter.asc())
             ).scalars().all()
-    person_obj = assigned_people[0].person
-    emails = [p.person.email for p in assigned_people[1:]]
+    # If this is a fresh task, ensure the order is random
+    # all tasks may be fresh so the same person could get pinged every time
+    if assigned_people[0].counter == 0:
+        zeros = []
+        for a in assigned_people:
+            if a.counter == 0:
+                zeros.append(a)
+        rand = random.choice(zeros)
+        person_obj = rand.person
+    else:
+        person_obj = assigned_people[0].person
+    emails = [p.person.email for p in assigned_people if not p.people_id == person_obj.id]
     msg = Message()
     subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_name)
     msg.set_payload(task_obj.description)
