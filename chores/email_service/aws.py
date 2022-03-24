@@ -6,7 +6,7 @@ from chores.email_service import EmailProvider
 
 
 class SesEmail(EmailProvider):
-    def init(self):
+    def __init__(self):
         self.client: SESClient = boto3.client('ses')
 
     def send(self, msg):

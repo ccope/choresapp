@@ -12,7 +12,7 @@ from chores.email_service import EmailProvider
 SCOPES = ["https://www.googleapis.com/auth/gmail.send/"]
 
 class GMailEmail(EmailProvider):
-    def init(self):
+    def __init__(self):
         self.creds = None
         self.service = None
         self.user_id = 'me'

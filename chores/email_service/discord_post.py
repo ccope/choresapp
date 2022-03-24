@@ -5,16 +5,13 @@ from discord.webhook.sync import SyncWebhook
 from chores.email_service import EmailProvider
 
 
-WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL')
-if not WEBHOOK_URL:
-    raise Exception("Missing DISCORD_WEBHOOK_URL environment variable")
-
-
 class DiscordMessage(EmailProvider):
-    webhook = SyncWebhook.from_url(WEBHOOK_URL)
 
-    def init(self):
-        pass
+    def __init__(self):
+        WEBHOOK_URL = os.environ.get('DISCORD_WEBHOOK_URL')
+        if not WEBHOOK_URL:
+            raise Exception("Missing DISCORD_WEBHOOK_URL environment variable")
+        self.webhook = SyncWebhook.from_url(WEBHOOK_URL)
 
     def send(self, msg: Message):
         messages = ["@everyone: {}".format(msg['Subject'])]
