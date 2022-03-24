@@ -110,7 +110,7 @@ def done():
     emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
     print(emails)
     msg = Message()
-    msg['Subject'] = "%s %sed. Thanks. (eom)" % (person_obj.name, task_obj.name)
+    msg['Subject'] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
     msg['Date'] = datetime.now().strftime(fmt)
     msg['From'] = "Chore Master <address@todo.fixme>"
     msg['To'] = person_obj.email
