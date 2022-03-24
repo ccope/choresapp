@@ -15,6 +15,7 @@ py-cord = "2.0.0b5"
 python = "3.10.2"
 SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
 alembic = "^1.7.6"
+typed-argument-parser = "^1.7.2"
 requests = "^2.27.1"
 python-dotenv = "^0.19.2"
 
