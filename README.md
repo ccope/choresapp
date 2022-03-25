@@ -9,7 +9,7 @@
 ### Setup:
 
 1. Install dependencies via poetry
-1. `alembic init choresdb`
+1. `alembic upgrade head`
 1. Populate database using the admin.py CLI. You can also import from it fairly easily to automate the process.
 1. Get credentials for your notification service of choice (GMail is currently non-functional)
 1. Configure your environment variables (see example in .env.sample)
