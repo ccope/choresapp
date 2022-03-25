@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import os
+
+from dotenv import load_dotenv
 from sqlalchemy import create_engine, select, and_
 from sqlalchemy.orm import Session
 from tap import Tap
@@ -7,6 +10,8 @@ from typing_extensions import Literal
 
 from chores.models.choresdb import Assignments, People, Tasks
 
+
+load_dotenv()
 g: Any = {}
 
 
@@ -123,5 +128,5 @@ class SimpleArgumentParser(Tap):
 
 if __name__ == '__main__':
     args = SimpleArgumentParser().parse_args()
-    g['engine'] = create_engine("sqlite+pysqlite:///chores.db", echo=True, future=True)
+    g['engine'] = create_engine(os.environ['DBURI'], echo=True, future=True)
     args.func(args)
