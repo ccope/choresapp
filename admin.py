@@ -80,8 +80,9 @@ def unassign_task(name: str, task: str):
     raise Exception("unimplemented!")
 
 
-def add_person(name: str):
-    email = input("Enter the person's email address: ")
+def add_person(name: str, email: Optional[str] = None):
+    if not email:
+        email = input("Enter the person's email address: ")
     newbie = People(name=name, email=email)
     with Session(g['engine']) as session:
         session.add(newbie)
