@@ -5,7 +5,7 @@ from email.message import Message
 from textwrap import dedent
 from typing import Dict, Tuple
 
-from flask import Flask, render_template, request
+from flask import Flask, Request, render_template, request
 from flask_sqlalchemy_session import current_session
 from sqlalchemy.sql import select, and_
 from sqlalchemy.orm import selectinload
@@ -15,6 +15,22 @@ from chores.models.choresdb import Assignments, People, Tasks
 template_dir = os.path.abspath('templates')
 fmt = '%a, %d %b %Y %H:%M:%S %z'
 app = Flask(__name__, template_folder=template_dir)
+
+
+class ProxiedRequest(Request):
+    def __init__(self, environ, populate_request=True, shallow=False):
+        super(Request, self).__init__(environ, populate_request, shallow)
+        # Support SSL termination. Mutate the host_url within Flask to use https://
+        # if the SSL was terminated.
+        x_forwarded_proto = self.headers.get('X-Forwarded-Proto')
+        if x_forwarded_proto == 'https':
+            self.url = self.url.replace('http://', 'https://')
+            self.host_url = self.host_url.replace('http://', 'https://')
+            self.base_url = self.base_url.replace('http://', 'https://')
+            self.url_root = self.url_root.replace('http://', 'https://')
+
+
+app.request_class = ProxiedRequest
 
 
 @app.route('/')
