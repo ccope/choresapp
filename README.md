@@ -1,10 +1,11 @@
 # ChoresApp
+
 ## Simple webapp to track whose turn it is to do chores
 
 ### Requirements:
 
-* Current alembic.ini points to a sqlite3 database, but it should be portable to other DBs.
-* Python 3.8+ (curerntly uses 3.10)
+- Current alembic.ini points to a sqlite3 database, but it should be portable to other DBs.
+- Python 3.8+ (currently uses 3.10)
 
 ### Setup:
 
