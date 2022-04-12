@@ -122,9 +122,7 @@ def done():
         person_obj, task_obj = validate_web_form(request.form)
     except ValueError as e:
         return e.msg
-    print(task_obj.people)
     emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
-    print(emails)
     msg = Message()
     msg['Subject'] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
     msg['Date'] = datetime.now().strftime(fmt)
