@@ -3,7 +3,7 @@ import random
 from datetime import datetime
 from email.message import Message
 from textwrap import dedent
-from typing import Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 from flask import Flask, Request, render_template, request
 from flask_sqlalchemy_session import current_session
@@ -88,40 +88,56 @@ def nag():
         </html>""" % (person_obj.name, task_name, request.url_root))
 
 
-def validate_web_form(form: Dict[str, str]) -> Tuple[People, Tasks]:
-    try:
-        person_name = form['name']
-        task_name = form['chore']
-    except KeyError:
-        raise ValueError("Bad form, SNOZZBALL.")
-    task_obj = current_session.execute(
-                   select(Tasks)
-                   .where(Tasks.name == task_name)
-                   ).scalars().one()
-    person_obj = current_session.execute(
-                     select(People)
-                     .where(People.name == person_name)
-                     ).scalars().one()
-    if not task_obj:
-        raise ValueError("Invalid chore, COMMIE.")
-    if not person_obj:
-        raise ValueError("Invalid person, dickhead.")
-    a_st = select(Assignments).where(
-            and_(Assignments.people_id == person_obj.id,
-                 Assignments.task_id == task_obj.id))
-    try:
-        assignment = current_session.execute(a_st).scalars().one()
-    except Exception:
-        raise ValueError("That person doesn't have to do that chore, dawg.")
-    return person_obj, task_obj
+# TODO: Make this a check for all valid fields, return a dictionary with all of the corresponding db objects
+def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]:
+    ret = {}
+    map_form_to_db = {"name": "person", "chore": "task"}
+    for field in fields:
+        form_value = form[field]
+        obj = None
+        if field == "chore":
+            obj = (
+                current_session.execute(select(Tasks).where(Tasks.name == form_value))
+                .scalars()
+                .one()
+            )
+
+        if field == "name":
+            obj = (
+                current_session.execute(select(People).where(People.name == form_value))
+                .scalars()
+                .one()
+            )
+        if obj:
+            ret[map_form_to_db[field]] = obj
+        else:
+            raise KeyError("Unknown field!")
+    if ret.get("person") and ret.get("task"):
+        a_st = select(Assignments).where(
+            and_(
+                Assignments.people_id == ret["person"].id,
+                Assignments.task_id == ret["task"].id,
+            )
+        )
+        try:
+            assignment = current_session.execute(a_st).scalars().one()
+            ret["assignment"] = assignment
+        except Exception:
+            raise ValueError("That person doesn't have to do that chore, dawg.")
+    return ret
 
 
 @app.route('/done', methods=["POST"])
 def done():
     try:
-        person_obj, task_obj = validate_web_form(request.form)
+        data = validate_web_form(request.form, ["name", "chore"])
     except ValueError as e:
         return e.msg
+    person_obj = data["person"]
+    task_obj = data["task"]
+    assignment: Assignments = data["assignment"]
+    assignment.counter += 1
+    current_session.commit()
     emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
     msg = Message()
     msg['Subject'] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
