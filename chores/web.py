@@ -17,6 +17,45 @@ fmt = '%a, %d %b %Y %H:%M:%S %z'
 app = Flask(__name__, template_folder=template_dir)
 
 
+# TODO: Think about renaming... everything
+def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]:
+    ret = {}
+    map_form_to_db = {"name": "person", "chore": "task"}
+    for field in fields:
+        form_value = form[field]
+        obj = None
+        if field == "chore":
+            obj = (
+                current_session.execute(select(Tasks).where(Tasks.name == form_value))
+                .scalars()
+                .one()
+            )
+
+        if field == "name":
+            obj = (
+                current_session.execute(select(People).where(People.name == form_value))
+                .scalars()
+                .one()
+            )
+        if obj:
+            ret[map_form_to_db[field]] = obj
+        else:
+            raise KeyError("Unknown field!")
+    if ret.get("person") and ret.get("task"):
+        a_st = select(Assignments).where(
+            and_(
+                Assignments.people_id == ret["person"].id,
+                Assignments.task_id == ret["task"].id,
+            )
+        )
+        try:
+            assignment = current_session.execute(a_st).scalars().one()
+            ret["assignment"] = assignment
+        except Exception:
+            raise ValueError("That person doesn't have to do that chore, dawg.")
+    return ret
+
+
 class ProxiedRequest(Request):
     def __init__(self, environ, populate_request=True, shallow=False):
         super(Request, self).__init__(environ, populate_request, shallow)
@@ -43,12 +82,10 @@ def displaychores():
 @app.route('/nag', methods=["POST"])
 def nag():
     try:
-        task_name = request.form['chore']
+        data = validate_web_form(request.form, ["chore"])
     except KeyError:
         raise ValueError("Bad form, SNOZZBALL.")
-    task_obj = current_session.execute(select(Tasks)
-                                       .where(Tasks.name == task_name)
-                                       ).scalars().one()
+    task_obj = data["task"]
     assigned_people = current_session.execute(
             select(Assignments).options(selectinload(Assignments.person))
             .where(Assignments.task_id == task_obj.id)
@@ -88,43 +125,6 @@ def nag():
         </html>""" % (person_obj.name, task_name, request.url_root))
 
 
-# TODO: Make this a check for all valid fields, return a dictionary with all of the corresponding db objects
-def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]:
-    ret = {}
-    map_form_to_db = {"name": "person", "chore": "task"}
-    for field in fields:
-        form_value = form[field]
-        obj = None
-        if field == "chore":
-            obj = (
-                current_session.execute(select(Tasks).where(Tasks.name == form_value))
-                .scalars()
-                .one()
-            )
-
-        if field == "name":
-            obj = (
-                current_session.execute(select(People).where(People.name == form_value))
-                .scalars()
-                .one()
-            )
-        if obj:
-            ret[map_form_to_db[field]] = obj
-        else:
-            raise KeyError("Unknown field!")
-    if ret.get("person") and ret.get("task"):
-        a_st = select(Assignments).where(
-            and_(
-                Assignments.people_id == ret["person"].id,
-                Assignments.task_id == ret["task"].id,
-            )
-        )
-        try:
-            assignment = current_session.execute(a_st).scalars().one()
-            ret["assignment"] = assignment
-        except Exception:
-            raise ValueError("That person doesn't have to do that chore, dawg.")
-    return ret
 
 
 @app.route('/done', methods=["POST"])
