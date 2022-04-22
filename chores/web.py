@@ -111,7 +111,7 @@ def nag():
         p.person.email for p in assigned_people if not p.people_id == person_obj.id
     ]
     msg = Message()
-    subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_name)
+    subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_obj.name)
     msg.set_payload(task_obj.description)
     msg["Subject"] = subject
     msg["Date"] = datetime.now().strftime(fmt)
@@ -131,7 +131,7 @@ def nag():
         <script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script>
         </body>
         </html>"""
-        % (person_obj.name, task_name, request.url_root)
+        % (person_obj.name, task_obj.name, request.url_root)
     )
 
 
