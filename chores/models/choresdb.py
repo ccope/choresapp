@@ -1,15 +1,5 @@
-from sqlalchemy import (
-        Column,
-        ForeignKey,
-        Integer,
-        String,
-        Text
-)
-from sqlalchemy.orm import (
-        Mapped,
-        declarative_base,
-        relationship
-)
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, declarative_base, relationship
 from typing import Any, List, TYPE_CHECKING
 
 # TODO: remove when sqlalchemy 2.0 types work properly
@@ -18,12 +8,13 @@ if TYPE_CHECKING:
 
     class Base(metaclass=DeclarativeMeta):
         __abstract__ = True
+
 else:
     Base = declarative_base()
 
 
 class People(Base):
-    __tablename__ = 'people'
+    __tablename__ = "people"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(128), nullable=False, unique=True)
@@ -32,7 +23,7 @@ class People(Base):
 
 
 class Tasks(Base):
-    __tablename__ = 'tasks'
+    __tablename__ = "tasks"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(128), nullable=False)
@@ -41,18 +32,18 @@ class Tasks(Base):
 
 
 class Assignments(Base):
-    __tablename__ = 'assignments'
+    __tablename__ = "assignments"
 
-    task_id = Column(Integer, ForeignKey('tasks.id'), primary_key=True)
-    people_id = Column(Integer, ForeignKey('people.id'), primary_key=True)
+    task_id = Column(Integer, ForeignKey("tasks.id"), primary_key=True)
+    people_id = Column(Integer, ForeignKey("people.id"), primary_key=True)
     counter = Column(Integer, default=0)
     task: Mapped["Tasks"] = relationship("Tasks", back_populates="people")
     person: Mapped["People"] = relationship("People", back_populates="tasks")
 
 
 class Timers(Base):
-    __tablename__ = 'timers'
+    __tablename__ = "timers"
 
     id = Column(Integer, primary_key=True)
-    task_id = Column(Integer, ForeignKey('tasks.id'), nullable=False)
+    task_id = Column(Integer, ForeignKey("tasks.id"), nullable=False)
     frequency = Column(Integer, default=72)

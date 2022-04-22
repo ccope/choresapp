@@ -7,7 +7,7 @@ from chores.notification_service import NotificationProvider
 
 class SesEmail(NotificationProvider):
     def __init__(self):
-        self.client: SESClient = boto3.client('ses')
+        self.client: SESClient = boto3.client("ses")
 
     def send(self, msg):
         self.client.send_raw_email(msg.as_string())

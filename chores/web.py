@@ -12,8 +12,8 @@ from sqlalchemy.orm import selectinload
 
 from chores.models.choresdb import Assignments, People, Tasks
 
-template_dir = os.path.abspath('templates')
-fmt = '%a, %d %b %Y %H:%M:%S %z'
+template_dir = os.path.abspath("templates")
+fmt = "%a, %d %b %Y %H:%M:%S %z"
 app = Flask(__name__, template_folder=template_dir)
 
 
@@ -61,36 +61,41 @@ class ProxiedRequest(Request):
         super(Request, self).__init__(environ, populate_request, shallow)
         # Support SSL termination. Mutate the host_url within Flask to use https://
         # if the SSL was terminated.
-        x_forwarded_proto = self.headers.get('X-Forwarded-Proto')
-        if x_forwarded_proto == 'https':
-            self.url = self.url.replace('http://', 'https://')
-            self.host_url = self.host_url.replace('http://', 'https://')
-            self.base_url = self.base_url.replace('http://', 'https://')
-            self.url_root = self.url_root.replace('http://', 'https://')
+        x_forwarded_proto = self.headers.get("X-Forwarded-Proto")
+        if x_forwarded_proto == "https":
+            self.url = self.url.replace("http://", "https://")
+            self.host_url = self.host_url.replace("http://", "https://")
+            self.base_url = self.base_url.replace("http://", "https://")
+            self.url_root = self.url_root.replace("http://", "https://")
 
 
 app.request_class = ProxiedRequest
 
 
-@app.route('/')
+@app.route("/")
 def displaychores():
     tasks = current_session.execute(select(Tasks.name)).scalars()
     names = current_session.execute(select(People.name)).scalars()
-    return render_template('chores.html', chores=list(tasks), names=list(names))
+    return render_template("chores.html", chores=list(tasks), names=list(names))
 
 
-@app.route('/nag', methods=["POST"])
+@app.route("/nag", methods=["POST"])
 def nag():
     try:
         data = validate_web_form(request.form, ["chore"])
     except KeyError:
         raise ValueError("Bad form, SNOZZBALL.")
     task_obj = data["task"]
-    assigned_people = current_session.execute(
-            select(Assignments).options(selectinload(Assignments.person))
+    assigned_people = (
+        current_session.execute(
+            select(Assignments)
+            .options(selectinload(Assignments.person))
             .where(Assignments.task_id == task_obj.id)
             .order_by(Assignments.counter.asc())
-            ).scalars().all()
+        )
+        .scalars()
+        .all()
+    )
     # If this is a fresh task, ensure the order is random
     # all tasks may be fresh so the same person could get pinged every time
     if assigned_people[0].counter == 0:
@@ -102,19 +107,22 @@ def nag():
         person_obj = rand.person
     else:
         person_obj = assigned_people[0].person
-    emails = [p.person.email for p in assigned_people if not p.people_id == person_obj.id]
+    emails = [
+        p.person.email for p in assigned_people if not p.people_id == person_obj.id
+    ]
     msg = Message()
     subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_name)
     msg.set_payload(task_obj.description)
-    msg['Subject'] = subject
-    msg['Date'] = datetime.now().strftime(fmt)
-    msg['From'] = "Chore Master <address@todo.fixme>"
-    msg['To'] = person_obj.email
-    msg['Cc'] = emails
-    msg['Reply-To'] = ""
+    msg["Subject"] = subject
+    msg["Date"] = datetime.now().strftime(fmt)
+    msg["From"] = "Chore Master <address@todo.fixme>"
+    msg["To"] = person_obj.email
+    msg["Cc"] = emails
+    msg["Reply-To"] = ""
     msg.preamble = "\n"
-    app.config['notifyer'].send(msg)
-    return dedent("""
+    app.config["notifyer"].send(msg)
+    return dedent(
+        """
         <!doctype html>
         <html>
         <head></head>
@@ -122,12 +130,12 @@ def nag():
         %s has been nagged to %s.
         <script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script>
         </body>
-        </html>""" % (person_obj.name, task_name, request.url_root))
+        </html>"""
+        % (person_obj.name, task_name, request.url_root)
+    )
 
 
-
-
-@app.route('/done', methods=["POST"])
+@app.route("/done", methods=["POST"])
 def done():
     try:
         data = validate_web_form(request.form, ["name", "chore"])
@@ -138,21 +146,24 @@ def done():
     assignment: Assignments = data["assignment"]
     assignment.counter += 1
     current_session.commit()
-    emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
+    emails = [
+        p.person.email for p in task_obj.people if p.person.email != person_obj.email
+    ]
     msg = Message()
-    msg['Subject'] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
-    msg['Date'] = datetime.now().strftime(fmt)
-    msg['From'] = "Chore Master <address@todo.fixme>"
-    msg['To'] = person_obj.email
-    msg['Cc'] = emails
-    msg['Reply-To'] = ""
+    msg["Subject"] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
+    msg["Date"] = datetime.now().strftime(fmt)
+    msg["From"] = "Chore Master <address@todo.fixme>"
+    msg["To"] = person_obj.email
+    msg["Cc"] = emails
+    msg["Reply-To"] = ""
     msg.preamble = "\n"
     try:
-        app.config['notifyer'].send(msg)
+        app.config["notifyer"].send(msg)
     except Exception as e:
         print("failed to email: %s" % e)
         return "failed to email %s!" % person_obj.name
-    return dedent("""
+    return dedent(
+        """
         <!doctype html>
         <html>
         <head></head>
@@ -160,4 +171,6 @@ def done():
         Thanks.
         <script>setTimeout(function() { window.location.assign("%s"); }, 2500);</script>
         </body>
-        </html>""" % request.url_root)
+        </html>"""
+        % request.url_root
+    )
