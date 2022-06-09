@@ -26,6 +26,7 @@ from base as prod
 COPY --from=builder /app /app
 WORKDIR /app
 COPY . .
+VOLUME /app/data
 
 CMD ["./entrypoint.sh"]
 EXPOSE 9001
