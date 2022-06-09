@@ -10,8 +10,8 @@
 ### Setup:
 
 1. Install dependencies via poetry
-1. `alembic upgrade head`
-1. Populate database using the admin.py CLI. You can also import from it fairly easily to automate the process.
-1. Get credentials for your notification service of choice (GMail is currently non-functional)
-1. Configure your environment variables (see example in .env.sample)
+1. Run `alembic upgrade head` to create the database in ./data/
+1. Populate database using the admin.py CLI. You can also script the process, see batch_sample.py
+1. Get credentials for your notification service of choice (currently AWS or Discord)
+1. Configure environment variables in a .env file or how you prefer (see example in .env.sample)
 1. Run main.py
