@@ -5,6 +5,7 @@ description = ""
 authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 
 [tool.poetry.dependencies]
+apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "0fb03eccaf254328caf2eb3da3e4dcd0883a9c4a" }
 boto3 = "^1.21.8"
 flask = "^2.0"
 flask-sqlalchemy-session = "^1.1"
