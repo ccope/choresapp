@@ -21,9 +21,9 @@ python-dotenv = "^0.19.2"
 
 [tool.poetry.dev-dependencies]
 boto3-stubs = {extras = ["ses"], version = "^1.21.8"}
-google-api-python-client-stubs = { git = "https://github.com/ccope/google-api-python-client-stubs" }
+google-api-python-client-stubs = "^1.11"
 google-auth-stubs = "^0.1.0"
-mypy = "^0.931"
+mypy = "^0.961"
 mypy-boto3 = "^1.21.8"
 pytest = "^5.2"
 pylsp-mypy = '^0.5.7'
