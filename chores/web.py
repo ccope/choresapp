@@ -107,9 +107,7 @@ def nag():
         person_obj = rand.person
     else:
         person_obj = assigned_people[0].person
-    emails = [
-        p.person.email for p in assigned_people if not p.people_id == person_obj.id
-    ]
+    emails = [p.person.email for p in assigned_people if not p.people_id == person_obj.id]
     msg = Message()
     subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_obj.name)
     msg.set_payload(task_obj.description)
@@ -146,9 +144,7 @@ def done():
     assignment: Assignments = data["assignment"]
     assignment.counter += 1
     current_session.commit()
-    emails = [
-        p.person.email for p in task_obj.people if p.person.email != person_obj.email
-    ]
+    emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
     msg = Message()
     msg["Subject"] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
     msg["Date"] = datetime.now().strftime(fmt)

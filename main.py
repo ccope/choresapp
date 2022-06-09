@@ -11,9 +11,7 @@ from chores.web import app
 
 
 load_dotenv()
-engine = create_engine(
-    os.environ["DBURI"], connect_args={"check_same_thread": False}, future=True
-)
+engine = create_engine(os.environ["DBURI"], connect_args={"check_same_thread": False}, future=True)
 SessionFactory = sessionmaker(autoflush=False, bind=engine)
 flask_scoped_session(SessionFactory, app)
 notification_provider_name = os.environ.get("NOTIFICATIONS")
