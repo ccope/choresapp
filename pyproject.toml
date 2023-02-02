@@ -5,16 +5,18 @@ description = ""
 authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 
 [tool.poetry.dependencies]
-apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "0fb03eccaf254328caf2eb3da3e4dcd0883a9c4a" }
+#apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "172edec65214ff00fcfd792e86ea46e3a7e60178" }
+apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "ab290bbb329028976994958d7fee22c28b3b5f97" }
 boto3 = "^1.21.8"
 flask = "^2.0"
 flask-sqlalchemy-session = "^1.1"
 google-api-python-client = "^2.39"
 google-auth-httplib2 = "^0.1"
 google-auth-oauthlib = "^0.4.6"
-py-cord = "2.0.0b5"
+py-cord = "^2.0"
 python = "^3.10.2"
-SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
+#SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
+SQLAlchemy = "^2.0.1"
 alembic = "^1.7.6"
 typed-argument-parser = "^1.7.2"
 requests = "^2.27.1"
