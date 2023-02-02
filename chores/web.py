@@ -3,13 +3,14 @@ import random
 from datetime import datetime
 from email.message import Message
 from textwrap import dedent
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from flask import Flask, Request, render_template, request
 from flask_sqlalchemy_session import current_session
 from sqlalchemy.sql import select, and_
 from sqlalchemy.orm import selectinload
 
+from chores.lib import get_assignees_sorted_by_count
 from chores.models.choresdb import Assignments, People, Tasks
 
 template_dir = os.path.abspath("templates")
@@ -86,28 +87,9 @@ def nag():
     except KeyError:
         raise ValueError("Bad form, SNOZZBALL.")
     task_obj = data["task"]
-    assigned_people = (
-        current_session.execute(
-            select(Assignments)
-            .options(selectinload(Assignments.person))
-            .where(Assignments.task_id == task_obj.id)
-            .order_by(Assignments.counter.asc())
-        )
-        .scalars()
-        .all()
-    )
-    # If this is a fresh task, ensure the order is random
-    # all tasks may be fresh so the same person could get pinged every time
-    if assigned_people[0].counter == 0:
-        zeros = []
-        for a in assigned_people:
-            if a.counter == 0:
-                zeros.append(a)
-        rand = random.choice(zeros)
-        person_obj = rand.person
-    else:
-        person_obj = assigned_people[0].person
-    emails = [p.person.email for p in assigned_people if not p.people_id == person_obj.id]
+    assignees = get_assignees_sorted_by_count(current_session, task_obj)
+    person_obj = assignees[0].person
+    emails = [p.person.email for p in assignees[1:]]
     msg = Message()
     subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_obj.name)
     msg.set_payload(task_obj.description)
