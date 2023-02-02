@@ -19,6 +19,7 @@ alembic = "^1.7.6"
 typed-argument-parser = "^1.7.2"
 requests = "^2.27.1"
 python-dotenv = "^0.19.2"
+uWSGI = "^2.0.20"
 
 [tool.poetry.dev-dependencies]
 boto3-stubs = {extras = ["ses"], version = "^1.21.8"}

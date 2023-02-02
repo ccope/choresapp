@@ -17,4 +17,5 @@ flask_scoped_session(SessionFactory, app)
 notification_provider_name = os.environ.get("NOTIFICATIONS")
 notification_provider = get_notification_provider(notification_provider_name)
 app.config["notifyer"] = notification_provider
-app.run(debug=False, host="0.0.0.0", port=9001)
+if __name__ == "__main__":
+    app.run(debug=False, host="0.0.0.0", port=9001)
