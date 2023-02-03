@@ -18,7 +18,7 @@ class Tasks(Base):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     description: Mapped[str] = mapped_column(Text)
     people: Mapped[List["Assignments"]] = relationship("Assignments")
 
