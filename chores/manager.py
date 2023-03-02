@@ -1,11 +1,13 @@
 import os
 
+from statistics import median
 from sqlalchemy import create_engine, select, and_
 from sqlalchemy.orm import Session
 from sqlalchemy.future import Engine
 from typing import Optional
 
 from chores.models.choresdb import Assignments, People, Tasks
+from chores.lib import get_assignment_leaderboard
 
 
 class Manager:
@@ -44,6 +46,11 @@ class Manager:
                 return
             a = Assignments()
             a.task = task
+            # Check if we need to initialize the counter to match up with other assignees
+            taskers = get_assignment_leaderboard(session, task)
+            if len(taskers) > 0:
+                # median in case one person is way ahead or behind
+                a.counter = int(median([x.counter for x in taskers]))
             person.tasks.append(a)
             session.commit()
             print("Assigned {} to {}".format(person_name, task_name))
