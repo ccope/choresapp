@@ -22,7 +22,7 @@ RUN pip install "poetry==$POETRY_VERSION" && poetry config virtualenvs.in-projec
 COPY pyproject.toml poetry.lock ./
 RUN poetry install --no-dev --no-interaction --no-ansi
 
-from base as prod
+FROM base as prod
 COPY --from=builder /app /app
 WORKDIR /app
 COPY . .
