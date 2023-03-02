@@ -9,7 +9,8 @@ authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
 apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "ab290bbb329028976994958d7fee22c28b3b5f97" }
 boto3 = "^1.21.8"
 flask = "^2.0"
-flask-sqlalchemy-session = "^1.1"
+# Fix for https://github.com/dtheodor/flask-sqlalchemy-session/issues/14
+flask-sqlalchemy-session = { git = "https://github.com/schettino72/flask-sqlalchemy-session.git", branch = "werkzeug21" }
 google-api-python-client = "^2.39"
 google-auth-httplib2 = "^0.1"
 google-auth-oauthlib = "^0.4.6"
