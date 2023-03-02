@@ -59,6 +59,16 @@ class Manager:
         print("TODO")
         raise Exception("unimplemented!")
 
+    def update_counts(self, person_id: int, task_id: int, count: int):
+        with Session(self.engine) as session:
+            a_st = select(Assignments).where(
+                and_(Assignments.people_id == person_id, Assignments.task_id == task_id)
+            )
+            assignment = session.execute(a_st).scalars().one()
+            assignment.counter = count
+            session.commit()
+            print("Set count for person {} doing task {} to {}".format(person_id, task_id, count))
+
     def add_person(self, name: str, email: Optional[str] = None):
         if not email:
             email = input("Enter the person's email address: ")
