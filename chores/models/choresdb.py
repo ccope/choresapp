@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
-from typing import Any, List, TYPE_CHECKING
+from typing import Any, List
 
 class Base(DeclarativeBase):
     pass
