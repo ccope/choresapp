@@ -80,6 +80,36 @@ def displaychores():
     return render_template("chores.html", chores=list(tasks), names=list(names))
 
 
+@app.route("/admin")
+def display_admin():
+    return render_template("admin_index.html")
+
+@app.route("/admin/assignments")
+def admin_assignments():
+    assignments = current_session.execute(select(Assignments.name)).scalars()
+    tasks = current_session.execute(select(Tasks.name)).scalars()
+    people = current_session.execute(select(People.name)).scalars()
+    return render_template("admin_assignments.html", chores=list(tasks), people=list(people))
+
+@app.route("/admin/people")
+def admin_people():
+    people = current_session.execute(select(People.name)).scalars()
+    schedules = current_session.execute(select(Schedules.name)).scalars()
+    tasks = current_session.execute(select(Tasks.name)).scalars()
+    return render_template("admin_people.html", chores=list(tasks), names=list(people), schedules=list(schedules))
+
+@app.route("/admin/schedules")
+def admin_schedules():
+    people = current_session.execute(select(People.name)).scalars()
+    schedules = current_session.execute(select(Schedules.name)).scalars()
+    tasks = current_session.execute(select(Tasks.name)).scalars()
+    return render_template("admin_schedules.html", chores=list(tasks), names=list(people), schedules=list(schedules))
+
+@app.route("/admin/tasks")
+def admin_tasks():
+    tasks = current_session.execute(select(Tasks.name)).scalars()
+    return render_template("admin_tasks.html", chores=list(tasks))
+
 @app.route("/nag", methods=["POST"])
 def nag():
     try:
