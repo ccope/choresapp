@@ -1,37 +1,85 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>HOUSE CHORES</title>
-</head>
-<body style="font-size:2vh;">
-  <h1 style="font-size:8vh;">DOING THE CHORES</h1>
-  Nag about:
-  <form action="/nag" method="post">
-    <select name="chore" style="font-size:2vh;">
-    {% for chore in chores %}
-      <option value="{{ chore }}">{{ chore }}</option>
-    {% endfor %}
-    </select>
-    <input type="submit" value="Nag!" style="font-size:2vh;">
-  </form>
-  <br />
-  <br />
-  Mark that:
-  <form action="/done" method="post">
-    <select name="name" style="font-size:2vh;">
-    {% for name in names %}
-    <option value="{{ name }}">{{ name }}</option>
-    {% endfor %}
-    </select>
-    did the:
-    <select name="chore" style="font-size:2vh;">
-    {% for chore in chores %}
-    <option value="{{ chore }}">{{ chore }}</option>
-    {% endfor %}
-    </select>
-    <input type="submit" value="Done!" style="font-size:2vh;">
-  </form>
-</body>
-</html>
-  
+{% extends "base.html" %}
+{% block title %}Chores{% endblock %}
+{% block header_title %}Chores Queue{% endblock %}
+{% block header_subtitle %}Stay on top of every task{% endblock %}
+{% block header_actions %}
+  <a
+    href="/admin"
+    class="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+  >
+    Admin Portal
+  </a>
+{% endblock %}
+{% block content %}
+  <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">Send a Nag</h2>
+          <p class="text-sm text-slate-500">Remind someone that it is their turn to complete a task.</p>
+        </div>
+        <span class="hidden rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700 sm:inline">Friendly reminder</span>
+      </header>
+      <form action="/nag" method="post" class="flex flex-col gap-4">
+        <label class="text-sm font-medium text-slate-700" for="nag-chore">Select chore</label>
+        <select
+          id="nag-chore"
+          name="chore"
+          class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+        >
+          {% for chore in chores %}
+            <option value="{{ chore }}">{{ chore }}</option>
+          {% endfor %}
+        </select>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:ring-offset-white"
+        >
+          Send Nag
+        </button>
+      </form>
+    </section>
+
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6 flex items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">Mark a Chore</h2>
+          <p class="text-sm text-slate-500">Record who completed which task.</p>
+        </div>
+        <span class="hidden rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-emerald-700 sm:inline">Great job!</span>
+      </header>
+      <form action="/done" method="post" class="flex flex-col gap-4">
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="done-name">Who completed it?</label>
+          <select
+            id="done-name"
+            name="name"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            {% for name in names %}
+              <option value="{{ name }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="done-chore">Which chore?</label>
+          <select
+            id="done-chore"
+            name="chore"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            {% for chore in chores %}
+              <option value="{{ chore }}">{{ chore }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:ring-offset-2 focus:ring-offset-white"
+        >
+          Mark as Done
+        </button>
+      </form>
+    </section>
+  </div>
+{% endblock %}
