@@ -1,12 +1,81 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>HOUSE CHORES</title>
-</head>
-<body style="font-size:2vh;">
-  <h1 style="font-size:8vh;">TASKS ADMIN</h1>
+{% extends "base.html" %}
+{% block title %}Manage Tasks{% endblock %}
+{% block header_title %}Task Administration{% endblock %}
+{% block header_subtitle %}Review and organize household chores{% endblock %}
+{% block header_actions %}
+  <a
+    href="/admin"
+    class="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+  >
+    Dashboard
+  </a>
+{% endblock %}
+{% block content %}
+  <div class="space-y-8">
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Current Tasks</h2>
+        <p class="text-sm text-slate-500">Keep track of all chores in rotation.</p>
+      </header>
+      {% if tasks %}
+        <div class="overflow-hidden rounded-xl border border-slate-200">
+          <ul class="divide-y divide-slate-200">
+            {% for task in tasks %}
+              <li class="flex flex-col items-start gap-4 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900">{{ task.name }}</h3>
+                  <p class="text-sm text-slate-500">{{ task.description or "No description provided." }}</p>
+                </div>
+                <form method="post" action="/admin/tasks/{{ task.id }}/delete" class="w-full sm:w-auto">
+                  <button
+                    type="submit"
+                    class="inline-flex w-full items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 focus:ring-offset-white"
+                  >
+                    Remove
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-sm text-slate-500">No tasks yet. Add your first chore below.</p>
+      {% endif %}
+    </section>
 
-</body>
-</html>
-  
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Add a New Task</h2>
+        <p class="text-sm text-slate-500">Include tasks with clear instructions to keep everyone aligned.</p>
+      </header>
+      <form action="/admin/tasks" method="post" class="space-y-4">
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="task-name">Task name</label>
+          <input
+            id="task-name"
+            name="name"
+            type="text"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="task-description">Description</label>
+          <textarea
+            id="task-description"
+            name="description"
+            rows="3"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+            placeholder="Any notes about how to complete this chore."
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:ring-offset-white"
+        >
+          Add Task
+        </button>
+      </form>
+    </section>
+  </div>
+{% endblock %}

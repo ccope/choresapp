@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Manage Schedules{% endblock %}
+{% block header_title %}Schedule Administration{% endblock %}
+{% block header_subtitle %}Coordinate chore timing and cadence{% endblock %}
+{% block header_actions %}
+  <a
+    href="/admin"
+    class="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+  >
+    Dashboard
+  </a>
+{% endblock %}
+{% block content %}
+  <div class="space-y-8">
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Current Schedules</h2>
+        <p class="text-sm text-slate-500">Review upcoming chore rotations and timing.</p>
+      </header>
+      {% if schedules %}
+        <div class="overflow-hidden rounded-xl border border-slate-200">
+          <ul class="divide-y divide-slate-200">
+            {% for schedule in schedules %}
+              <li class="flex flex-col items-start gap-4 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900">{{ schedule.name }}</h3>
+                  <dl class="mt-2 grid grid-cols-2 gap-2 text-sm text-slate-500">
+                    <div>
+                      <dt class="uppercase">Task</dt>
+                      <dd>{{ schedule.task.name }}</dd>
+                    </div>
+                    <div>
+                      <dt class="uppercase">Frequency</dt>
+                      <dd>{{ schedule.frequency_display }}</dd>
+                    </div>
+                    <div>
+                      <dt class="uppercase">Next Run</dt>
+                      <dd>{{ schedule.next_run | default("Not set") }}</dd>
+                    </div>
+                    <div>
+                      <dt class="uppercase">Assigned To</dt>
+                      <dd>{{ schedule.person.name if schedule.person else "Rotation" }}</dd>
+                    </div>
+                  </dl>
+                </div>
+                <form method="post" action="/admin/schedules/{{ schedule.id }}/delete" class="w-full sm:w-auto">
+                  <button
+                    type="submit"
+                    class="inline-flex w-full items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 focus:ring-offset-white"
+                  >
+                    Remove
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-sm text-slate-500">No schedules defined yet. Add one below to automate your chores.</p>
+      {% endif %}
+    </section>
+
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Add a Schedule</h2>
+        <p class="text-sm text-slate-500">Set up recurring chores and assign who handles them.</p>
+      </header>
+      <form action="/admin/schedules" method="post" class="space-y-4">
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="schedule-name">Schedule name</label>
+          <input
+            id="schedule-name"
+            name="name"
+            type="text"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="schedule-task">Task</label>
+          <select
+            id="schedule-task"
+            name="task_id"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            {% for task in tasks %}
+              <option value="{{ task.id }}">{{ task.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="schedule-frequency">Frequency</label>
+          <select
+            id="schedule-frequency"
+            name="frequency"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="schedule-person">Assigned To (optional)</label>
+          <select
+            id="schedule-person"
+            name="person_id"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          >
+            <option value="">Rotation</option>
+            {% for person in people %}
+              <option value="{{ person.id }}">{{ person.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="schedule-start">Start date</label>
+          <input
+            id="schedule-start"
+            name="start_date"
+            type="date"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+        </div>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:ring-offset-white"
+        >
+          Add Schedule
+        </button>
+      </form>
+    </section>
+  </div>
+{% endblock %}
+

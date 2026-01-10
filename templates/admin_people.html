@@ -1,13 +1,84 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>HOUSE CHORES</title>
-</head>
-<body style="font-size:2vh;">
-  <h1 style="font-size:8vh;">HR</h1>
+{% extends "base.html" %}
+{% block title %}Manage People{% endblock %}
+{% block header_title %}People Administration{% endblock %}
+{% block header_subtitle %}Maintain the household roster and roles{% endblock %}
+{% block header_actions %}
+  <a
+    href="/admin"
+    class="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+  >
+    Dashboard
+  </a>
+{% endblock %}
+{% block content %}
+  <div class="space-y-8">
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Current Household Members</h2>
+        <p class="text-sm text-slate-500">Review who is assigned to chores and manage their participation.</p>
+      </header>
+      {% if people %}
+        <div class="overflow-hidden rounded-xl border border-slate-200">
+          <ul class="divide-y divide-slate-200">
+            {% for person in people %}
+              <li class="flex flex-col items-start gap-4 bg-white px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 class="text-base font-semibold text-slate-900">{{ person.name }}</h3>
+                  {% if person.email %}
+                    <p class="text-sm text-slate-500">{{ person.email }}</p>
+                  {% endif %}
+                </div>
+                <form method="post" action="/admin/people/{{ person.id }}/delete" class="w-full sm:w-auto">
+                  <button
+                    type="submit"
+                    class="inline-flex w-full items-center justify-center rounded-xl bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-600 focus:ring-offset-2 focus:ring-offset-white"
+                  >
+                    Remove
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-sm text-slate-500">No household members yet. Add someone new below.</p>
+      {% endif %}
+    </section>
 
-</body>
-</html>
-  
+    <section class="rounded-2xl bg-white p-6 shadow-sm">
+      <header class="mb-6">
+        <h2 class="text-lg font-semibold text-slate-900">Add a Household Member</h2>
+        <p class="text-sm text-slate-500">Invite someone to join the chore rotation.</p>
+      </header>
+      <form action="/admin/people" method="post" class="space-y-4">
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="person-name">Full name</label>
+          <input
+            id="person-name"
+            name="name"
+            type="text"
+            required
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+          />
+        </div>
+        <div>
+          <label class="mb-2 block text-sm font-medium text-slate-700" for="person-email">Email address</label>
+          <input
+            id="person-email"
+            name="email"
+            type="email"
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 shadow-sm transition focus:border-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
+            placeholder="Optional contact information"
+          />
+        </div>
+        <button
+          type="submit"
+          class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-3 text-base font-semibold text-white shadow-sm transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 focus:ring-offset-white"
+        >
+          Add Member
+        </button>
+      </form>
+    </section>
+  </div>
+{% endblock %}
 

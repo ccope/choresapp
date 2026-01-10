@@ -1,14 +1,51 @@
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8"/>
-  <title>HOUSE CHORES</title>
-</head>
-<body style="font-size:2vh;">
-  <h1 style="font-size:8vh;">ADMIN</h1>
-  <a href="/admin/tasks">Tasks</a>
-  <a href="/admin/people">People</a>
-  <a href="/admin/schedules">Schedules</a>
-</body>
-</html>
-  
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block header_title %}Admin Control Center{% endblock %}
+{% block header_subtitle %}Manage your household data{% endblock %}
+{% block header_actions %}
+  <a
+    href="/"
+    class="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-medium text-white transition hover:border-white hover:bg-white hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-slate-900"
+  >
+    Return Home
+  </a>
+{% endblock %}
+{% block content %}
+  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <a
+      href="/admin/tasks"
+      class="group flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+    >
+      <div class="inline-flex size-12 items-center justify-center rounded-full bg-slate-900/10 text-xl text-slate-900">🧹</div>
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">Tasks</h2>
+        <p class="text-sm text-slate-500">Add, remove, and review all chores tracked within the household.</p>
+      </div>
+      <span class="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:gap-3">Manage Tasks →</span>
+    </a>
+
+    <a
+      href="/admin/people"
+      class="group flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+    >
+      <div class="inline-flex size-12 items-center justify-center rounded-full bg-slate-900/10 text-xl text-slate-900">👥</div>
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">People</h2>
+        <p class="text-sm text-slate-500">Maintain the roster of participants and keep their details current.</p>
+      </div>
+      <span class="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:gap-3">Manage People →</span>
+    </a>
+
+    <a
+      href="/admin/schedules"
+      class="group flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+    >
+      <div class="inline-flex size-12 items-center justify-center rounded-full bg-slate-900/10 text-xl text-slate-900">🗓️</div>
+      <div>
+        <h2 class="text-lg font-semibold text-slate-900">Schedules</h2>
+        <p class="text-sm text-slate-500">Coordinate when chores occur and automate reminders for fairness.</p>
+      </div>
+      <span class="mt-auto inline-flex items-center gap-2 text-sm font-semibold text-slate-900 group-hover:gap-3">Manage Schedules →</span>
+    </a>
+  </div>
+{% endblock %}
