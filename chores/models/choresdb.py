@@ -1,9 +1,12 @@
+from typing import List
+
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
-from typing import Any, List
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
 
 class Base(DeclarativeBase):
-    pass
+    """Base declarative model."""
+
 
 class People(Base):
     __tablename__ = "people"
@@ -11,7 +14,11 @@ class People(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    tasks: Mapped[List["Assignments"]] = relationship("Assignments")
+    tasks: Mapped[List["Assignments"]] = relationship(
+        "Assignments",
+        back_populates="person",
+        cascade="all, delete-orphan",
+    )
 
 
 class Tasks(Base):
@@ -19,8 +26,8 @@ class Tasks(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    description: Mapped[str] = mapped_column(Text)
-    people: Mapped[List["Assignments"]] = relationship("Assignments")
+    description: Mapped[str] = mapped_column(Text, default="")
+    people: Mapped[List["Assignments"]] = relationship("Assignments", back_populates="task")
 
 
 class Assignments(Base):
