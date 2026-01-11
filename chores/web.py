@@ -132,8 +132,8 @@ def nag():
         raise ValueError("Bad form, SNOZZBALL.")
     task_obj = data["task"]
     assignees = get_assignees_sorted_by_count(current_session, task_obj)
-    person_obj = assignees[0].person
-    emails = [p.person.email for p in assignees[1:]]
+    person_obj = assignees[0]
+    emails = [p.email for p in assignees[1:]]
     msg = Message()
     subject = "%s NEEDS TO DO THE %s" % (person_obj.name, task_obj.name)
     msg.set_payload(task_obj.description)
@@ -141,7 +141,7 @@ def nag():
     msg["Date"] = datetime.now().strftime(fmt)
     msg["From"] = "Chore Master <address@todo.fixme>"
     msg["To"] = person_obj.email
-    msg["Cc"] = emails
+    msg["Cc"] = ", ".join(emails)
     msg["Reply-To"] = ""
     msg.preamble = "\n"
     app.config["notifyer"].send(msg)
@@ -164,7 +164,7 @@ def done():
     try:
         data = validate_web_form(request.form, ["name", "chore"])
     except ValueError as e:
-        return e.msg
+        return str(e)
     person_obj = data["person"]
     task_obj = data["task"]
     assignment: Assignments = data["assignment"]
@@ -176,7 +176,7 @@ def done():
     msg["Date"] = datetime.now().strftime(fmt)
     msg["From"] = "Chore Master <address@todo.fixme>"
     msg["To"] = person_obj.email
-    msg["Cc"] = emails
+    msg["Cc"] = ", ".join(emails)
     msg["Reply-To"] = ""
     msg.preamble = "\n"
     try:
