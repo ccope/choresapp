@@ -11,7 +11,7 @@ from sqlalchemy.sql import select, and_
 from sqlalchemy.orm import selectinload
 
 from chores.lib import get_assignees_sorted_by_count
-from chores.models.choresdb import Assignments, People, Tasks
+from chores.models.choresdb import Assignments, People, Tasks, AutoNags
 
 template_dir = os.path.abspath("templates")
 fmt = "%a, %d %b %Y %H:%M:%S %z"
@@ -87,7 +87,6 @@ def display_admin():
 
 @app.route("/admin/assignments")
 def admin_assignments():
-    assignments = current_session.execute(select(Assignments.name)).scalars()
     tasks = current_session.execute(select(Tasks.name)).scalars()
     people = current_session.execute(select(People.name)).scalars()
     return render_template(
@@ -109,7 +108,7 @@ def admin_people():
 @app.route("/admin/autonag")
 def admin_autonag():
     people = current_session.execute(select(People.name)).scalars()
-    autonags = current_session.execute(select(AutoNag.name)).scalars()
+    autonags = current_session.execute(select(AutoNags.id)).scalars()
     tasks = current_session.execute(select(Tasks.name)).scalars()
     return render_template(
         "admin_autonag.html",

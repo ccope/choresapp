@@ -40,8 +40,8 @@ class Assignments(Base):
     person: Mapped["People"] = relationship("People", back_populates="tasks")
 
 
-class Timers(Base):
-    __tablename__ = "timers"
+class AutoNags(Base):
+    __tablename__ = "autonags"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     task_id: Mapped[int] = mapped_column(Integer, ForeignKey("tasks.id"), nullable=False)
