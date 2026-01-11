@@ -34,18 +34,18 @@ ChoresApp is a simple webapp to track whose turn it is to do chores and send not
 
 ## TODO
 
-- Beautify the html pages, making them responsive and touch-friendly. Avoid adding javascript.
 - create admin pages
   - list/add/remove users
   - list/add/remove tasks
-  - list/add/remove schedules
-- admin auth session
-- set up schedules
-- Create scheduled auto-nag function for different tasks based on apscheduler
+- implement admin permissions (grant people admin permissions, require admin rights to modify users/tasks/schedules)
 - make reusable logic to identify who's turn is next
 - add vacation mode
-  - save their position in the queue of whose turn it is
+  - save people's position in the queue of whose turn it is
   - when vacation is over, set their task completion count to the current count of the position ahead of their prior position, then subtract one
+  - create routes to view/add/remove vacations, add new html page, and add navigation link from the homepage to the new page
+- Create scheduled auto-nag function for different tasks based on apscheduler
+- create admin pages for auto-nag
+  - list/add/remove auto-nag schedules
 
 ## Back Burner
 
