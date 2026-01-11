@@ -37,7 +37,7 @@ ChoresApp is a simple webapp to track whose turn it is to do chores and send not
 - create admin pages
   - list/add/remove users
   - list/add/remove tasks
-- implement admin permissions (grant people admin permissions, require admin rights to modify users/tasks/schedules)
+- implement admin permissions (grant people admin permissions, require admin rights to modify users/tasks)
 - make reusable logic to identify who's turn is next
 - add vacation mode
   - save people's position in the queue of whose turn it is
