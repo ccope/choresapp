@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Manage Schedules{% endblock %}
-{% block header_title %}Schedule Administration{% endblock %}
-{% block header_subtitle %}Coordinate chore timing and cadence{% endblock %}
+{% block title %}Manage Auto-Nag Schedules{% endblock %}
+{% block header_title %}Auto-Nag Schedule Administration{% endblock %}
+{% block header_subtitle %}Coordinate chore times and frequency{% endblock %}
 {% block header_actions %}
   <a
     href="/admin"
@@ -14,7 +14,7 @@
   <div class="space-y-8">
     <section class="rounded-2xl bg-white p-6 shadow-sm">
       <header class="mb-6">
-        <h2 class="text-lg font-semibold text-slate-900">Current Schedules</h2>
+        <h2 class="text-lg font-semibold text-slate-900">Current Auto-Nag Schedules</h2>
         <p class="text-sm text-slate-500">Review upcoming chore rotations and timing.</p>
       </header>
       {% if schedules %}
@@ -56,7 +56,7 @@
           </ul>
         </div>
       {% else %}
-        <p class="text-sm text-slate-500">No schedules defined yet. Add one below to automate your chores.</p>
+        <p class="text-sm text-slate-500">No schedules defined yet. Add one below to automate your chores reminders.</p>
       {% endif %}
     </section>
 
