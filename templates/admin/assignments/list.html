@@ -1,0 +1,66 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-md p-6">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold text-gray-800">Task Assignments</h2>
+        <a href="{{ url_for('admin.new_assignment') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition">
+            + Create Assignment
+        </a>
+    </div>
+
+    {% if assignments %}
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Person</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Task</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Times Completed</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for assignment in assignments %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">
+                                <a href="{{ url_for('admin.view_person', person_id=assignment.person.id) }}" class="text-blue-600 hover:text-blue-900">
+                                    {{ assignment.person.name }}
+                                </a>
+                            </div>
+                            <div class="text-sm text-gray-500">{{ assignment.person.email }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">
+                                <a href="{{ url_for('admin.view_task', task_id=assignment.task.id) }}" class="text-blue-600 hover:text-blue-900">
+                                    {{ assignment.task.name }}
+                                </a>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-500">{{ assignment.counter }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="{{ url_for('admin.view_assignment', task_id=assignment.task_id, people_id=assignment.people_id) }}" class="text-blue-600 hover:text-blue-900 mr-3">View</a>
+                            <form method="POST" action="{{ url_for('admin.delete_assignment', task_id=assignment.task_id, people_id=assignment.people_id) }}" class="inline" onsubmit="return confirm('Are you sure you want to remove this assignment?');">
+                                <button type="submit" class="text-red-600 hover:text-red-900">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-12">
+            <p class="text-gray-500 text-lg mb-4">No assignments found.</p>
+            <a href="{{ url_for('admin.new_assignment') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg inline-block transition">
+                Create Your First Assignment
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
