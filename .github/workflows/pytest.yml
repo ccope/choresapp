@@ -1,0 +1,80 @@
+name: Run pytest
+
+on:
+  push:
+    branches: [ main, copilot/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+        # Install main dependencies from pyproject.toml
+        pip install -e .
+    
+    - name: Set up test environment
+      run: |
+        # Create .env file for testing
+        echo "DBURI=sqlite:///:memory:" > .env
+        echo "SECRET_KEY=test-secret-key" >> .env
+        echo "NOTIFICATIONS=None" >> .env
+        
+        # Create data directory
+        mkdir -p data
+    
+    - name: Run pytest with coverage
+      run: |
+        pytest tests/ \
+          --verbose \
+          --junit-xml=test-results/pytest.xml \
+          --cov=chores \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term-missing
+      continue-on-error: true
+    
+    - name: Upload pytest results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: pytest-results
+        path: test-results/pytest.xml
+    
+    - name: Upload coverage reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          coverage.xml
+          htmlcov/
+    
+    - name: Publish test results
+      if: always()
+      uses: EnricoMi/publish-unit-test-result-action@v2
+      with:
+        files: test-results/pytest.xml
+        check_name: Pytest Results
+        comment_title: Test Results
+    
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: py-cov-action/python-coverage-comment-action@v3
+      with:
+        GITHUB_TOKEN: ${{ github.token }}
+        MINIMUM_GREEN: 70
+        MINIMUM_ORANGE: 50
