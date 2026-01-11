@@ -43,7 +43,7 @@ ChoresApp is a simple webapp to track whose turn it is to do chores and send not
 - password-protect the admin routes
 - make reusable logic to identify who's turn is next for a given task
 - add vacation mode
-  - save the number of times each task has been done in the vacation record
+  - save the number of times each task has been done in the vacation table
   - when vacation is over, for each task type, get the delta of the count of task completions since the vacation record was created, and add that delta to the person's count
   - create CRUD routes to view/add/remove vacations for people
   - add new html page for vacations, and add navigation link from the homepage to the new page
