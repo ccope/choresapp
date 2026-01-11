@@ -6,16 +6,18 @@ from textwrap import dedent
 from typing import Any, Dict, List
 
 from flask import Flask, Request, render_template, request
-from flask_sqlalchemy_session import current_session
 from sqlalchemy.sql import select, and_
-from sqlalchemy.orm import selectinload
 
 from chores.lib import get_assignees_sorted_by_count
-from chores.models.choresdb import Assignments, People, Tasks, AutoNags
+from chores.models.choresdb import Assignments, People, Tasks, AutoNags, db
 
 template_dir = os.path.abspath("templates")
 fmt = "%a, %d %b %Y %H:%M:%S %z"
-app = Flask(__name__, template_folder=template_dir)
+app = Flask(
+    __name__,
+    template_folder=template_dir,
+    instance_path=os.path.join(os.getcwd(), "data"),
+)
 
 
 # TODO: Think about renaming... everything
@@ -27,14 +29,14 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
         obj = None
         if field == "chore":
             obj = (
-                current_session.execute(select(Tasks).where(Tasks.name == form_value))
+                db.session.execute(select(Tasks).where(Tasks.name == form_value))
                 .scalars()
                 .one()
             )
 
         if field == "name":
             obj = (
-                current_session.execute(select(People).where(People.name == form_value))
+                db.session.execute(select(People).where(People.name == form_value))
                 .scalars()
                 .one()
             )
@@ -50,7 +52,7 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
             )
         )
         try:
-            assignment = current_session.execute(a_st).scalars().one()
+            assignment = db.session.execute(a_st).scalars().one()
             ret["assignment"] = assignment
         except Exception:
             raise ValueError("That person doesn't have to do that chore, dawg.")
@@ -75,8 +77,8 @@ app.request_class = ProxiedRequest
 
 @app.route("/")
 def displaychores():
-    tasks = current_session.execute(select(Tasks.name)).scalars()
-    names = current_session.execute(select(People.name)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
+    names = db.session.execute(select(People.name)).scalars()
     return render_template("chores.html", chores=list(tasks), names=list(names))
 
 
@@ -87,8 +89,8 @@ def display_admin():
 
 @app.route("/admin/assignments")
 def admin_assignments():
-    tasks = current_session.execute(select(Tasks.name)).scalars()
-    people = current_session.execute(select(People.name)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
+    people = db.session.execute(select(People.name)).scalars()
     return render_template(
         "admin_assignments.html", chores=list(tasks), people=list(people)
     )
@@ -96,8 +98,8 @@ def admin_assignments():
 
 @app.route("/admin/people")
 def admin_people():
-    people = current_session.execute(select(People.name)).scalars()
-    tasks = current_session.execute(select(Tasks.name)).scalars()
+    people = db.session.execute(select(People.name)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
     return render_template(
         "admin_people.html",
         chores=list(tasks),
@@ -107,9 +109,9 @@ def admin_people():
 
 @app.route("/admin/autonag")
 def admin_autonag():
-    people = current_session.execute(select(People.name)).scalars()
-    autonags = current_session.execute(select(AutoNags.id)).scalars()
-    tasks = current_session.execute(select(Tasks.name)).scalars()
+    people = db.session.execute(select(People.name)).scalars()
+    autonags = db.session.execute(select(AutoNags.id)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
     return render_template(
         "admin_autonag.html",
         chores=list(tasks),
@@ -120,7 +122,7 @@ def admin_autonag():
 
 @app.route("/admin/tasks")
 def admin_tasks():
-    tasks = current_session.execute(select(Tasks.name)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
     return render_template("admin_tasks.html", chores=list(tasks))
 
 
@@ -131,7 +133,8 @@ def nag():
     except KeyError:
         raise ValueError("Bad form, SNOZZBALL.")
     task_obj = data["task"]
-    assignees = get_assignees_sorted_by_count(current_session, task_obj)
+    assert isinstance(task_obj, Tasks)
+    assignees = get_assignees_sorted_by_count(db.session, task_obj)
     person_obj = assignees[0]
     emails = [p.email for p in assignees[1:]]
     msg = Message()
@@ -169,7 +172,7 @@ def done():
     task_obj = data["task"]
     assignment: Assignments = data["assignment"]
     assignment.counter += 1
-    current_session.commit()
+    db.session.commit()
     emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
     msg = Message()
     msg["Subject"] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)

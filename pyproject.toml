@@ -11,17 +11,17 @@ dependencies = [
     "apscheduler",
     "boto3>=1.21.8",
     "flask>=2.0",
-    "flask-sqlalchemy-session",
+    "flask-sqlalchemy>=3.0",
     "google-api-python-client>=2.39",
     "google-auth-httplib2>=0.1",
     "google-auth-oauthlib>=0.4.6",
     "py-cord>=2.0",
     "SQLAlchemy>=2.0.1",
-    "alembic>=1.7.6",
     "typed-argument-parser>=1.7.2",
     "requests>=2.27.1",
     "python-dotenv>=0.19.2",
     "uWSGI>=2.0.20",
+    "flask-migrate>=4.1.0",
 ]
 
 [dependency-groups]
@@ -41,8 +41,6 @@ dev = [
 [tool.uv.sources]
 apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "ab290bbb329028976994958d7fee22c28b3b5f97" }
 # apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "172edec65214ff00fcfd792e86ea46e3a7e60178" }
-# Fix for https://github.com/dtheodor/flask-sqlalchemy-session/issues/14
-flask-sqlalchemy-session = { git = "https://github.com/schettino72/flask-sqlalchemy-session.git", branch = "werkzeug21" }
 # SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
 
 [tool.black]
