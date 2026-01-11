@@ -1,10 +1,11 @@
 """Admin routes for managing people, tasks, and assignments."""
 import os
+from statistics import median
 from typing import Any, Dict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy_session import current_session
-from sqlalchemy.sql import select
+from sqlalchemy.sql import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 
@@ -348,7 +349,6 @@ def create_assignment():
         return redirect(url_for("admin.new_assignment"))
     
     # Create assignment with counter set to median of existing assignees
-    from statistics import median
     existing_assignments = current_session.execute(
         select(Assignments).where(Assignments.task_id == task_id)
     ).scalars().all()
@@ -416,13 +416,13 @@ def delete_assignment(task_id: int, people_id: int):
 @admin_bp.route("/")
 def index():
     """Admin home page."""
-    people_count = current_session.execute(select(People)).scalars().all()
-    tasks_count = current_session.execute(select(Tasks)).scalars().all()
-    assignments_count = current_session.execute(select(Assignments)).scalars().all()
+    people_count = current_session.execute(select(func.count(People.id))).scalar()
+    tasks_count = current_session.execute(select(func.count(Tasks.id))).scalar()
+    assignments_count = current_session.execute(select(func.count(Assignments.task_id))).scalar()
     
     return render_template(
         "admin/index.html",
-        people_count=len(people_count),
-        tasks_count=len(tasks_count),
-        assignments_count=len(assignments_count)
+        people_count=people_count,
+        tasks_count=tasks_count,
+        assignments_count=assignments_count
     )

@@ -21,7 +21,7 @@ class Manager:
         with Session(self.engine) as session:
             tasks = session.execute(select(Tasks).where(Tasks.name == name)).fetchall()
             if len(tasks) > 0:
-                print("Task {} already exists, skpping".format(name))
+                print("Task {} already exists, skipping".format(name))
             else:
                 session.add(new_task)
                 session.commit()
