@@ -50,7 +50,6 @@
 
       <footer class="bg-slate-900/80 py-6 text-sm text-slate-300">
         <div class="mx-auto flex max-w-6xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>&copy; {{ current_year | default( ("now" | date("%Y")) ) }} ChoresApp.</div>
           <div class="flex flex-wrap gap-3">
             {% block footer_links %}{% endblock %}
           </div>
