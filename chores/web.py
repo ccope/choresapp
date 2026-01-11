@@ -1,9 +1,8 @@
 import os
-import random
 from datetime import datetime
 from email.message import Message
 from textwrap import dedent
-from typing import Any, Dict, List
+from typing import Dict, List, Union
 
 from flask import Flask, Request, render_template, request
 from sqlalchemy.sql import select, and_
@@ -21,12 +20,16 @@ app = Flask(
 
 
 # TODO: Think about renaming... everything
-def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]:
+def validate_web_form(
+    form: Dict[str, str], fields: List[str]
+) -> Dict[str, Union[Assignments, People, Tasks]]:
     ret = {}
     map_form_to_db = {"name": "person", "chore": "task"}
     for field in fields:
         form_value = form[field]
         obj = None
+        if field not in map_form_to_db.values():
+            raise KeyError("Unknown field!")
         if field == "chore":
             obj = (
                 db.session.execute(select(Tasks).where(Tasks.name == form_value))
@@ -42,8 +45,6 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
             )
         if obj:
             ret[map_form_to_db[field]] = obj
-        else:
-            raise KeyError("Unknown field!")
     if ret.get("person") and ret.get("task"):
         a_st = select(Assignments).where(
             and_(
@@ -56,6 +57,8 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
             ret["assignment"] = assignment
         except Exception:
             raise ValueError("That person doesn't have to do that chore, dawg.")
+    if not ret.keys():
+        raise KeyError("No valid fields found!")
     return ret
 
 
@@ -169,11 +172,16 @@ def done():
     except ValueError as e:
         return str(e)
     person_obj = data["person"]
+    assert isinstance(person_obj, People)
     task_obj = data["task"]
-    assignment: Assignments = data["assignment"]
+    assert isinstance(task_obj, Tasks)
+    assignment = data["assignment"]
+    assert isinstance(assignment, Assignments)
     assignment.counter += 1
     db.session.commit()
-    emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
+    emails = [
+        p.person.email for p in task_obj.people if p.person.email != person_obj.email
+    ]
     msg = Message()
     msg["Subject"] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)
     msg["Date"] = datetime.now().strftime(fmt)
