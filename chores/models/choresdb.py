@@ -1,29 +1,40 @@
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import Mapped, DeclarativeBase, mapped_column, relationship
-from typing import Any, List
+from typing import List
+
+from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from flask_sqlalchemy import SQLAlchemy
+
 
 class Base(DeclarativeBase):
-    pass
+    """Base declarative model."""
 
-class People(Base):
+
+db = SQLAlchemy(model_class=Base)
+
+
+class People(db.Model):
     __tablename__ = "people"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
     email: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    tasks: Mapped[List["Assignments"]] = relationship("Assignments")
+    tasks: Mapped[List["Assignments"]] = relationship(
+        "Assignments",
+        back_populates="person",
+        cascade="all, delete-orphan",
+    )
 
 
-class Tasks(Base):
+class Tasks(db.Model):
     __tablename__ = "tasks"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
-    description: Mapped[str] = mapped_column(Text)
-    people: Mapped[List["Assignments"]] = relationship("Assignments")
+    description: Mapped[str] = mapped_column(Text, default="")
+    people: Mapped[List["Assignments"]] = relationship("Assignments", back_populates="task")
 
 
-class Assignments(Base):
+class Assignments(db.Model):
     __tablename__ = "assignments"
 
     task_id: Mapped[int] = mapped_column(Integer, ForeignKey("tasks.id"), primary_key=True)
@@ -33,8 +44,8 @@ class Assignments(Base):
     person: Mapped["People"] = relationship("People", back_populates="tasks")
 
 
-class Timers(Base):
-    __tablename__ = "timers"
+class AutoNags(db.Model):
+    __tablename__ = "autonags"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     task_id: Mapped[int] = mapped_column(Integer, ForeignKey("tasks.id"), nullable=False)

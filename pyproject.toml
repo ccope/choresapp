@@ -1,44 +1,52 @@
-[tool.poetry]
+[project]
 name = "chores"
 version = "0.1.0"
 description = ""
-authors = ["Cam Tenny @cjtenny", "Cam Cope <github.choresapp@camcope.me>"]
+authors = [
+    { name = "Cam Tenny @cjtenny" },
+    { name = "Cam Cope", email = "github.choresapp@camcope.me" },
+]
+requires-python = ">=3.10.2"
+dependencies = [
+    "apscheduler",
+    "boto3>=1.21.8",
+    "flask>=2.0",
+    "flask-sqlalchemy>=3.0",
+    "google-api-python-client>=2.39",
+    "google-auth-httplib2>=0.1",
+    "google-auth-oauthlib>=0.4.6",
+    "py-cord>=2.0",
+    "SQLAlchemy>=2.0.1",
+    "typed-argument-parser>=1.7.2",
+    "requests>=2.27.1",
+    "python-dotenv>=0.19.2",
+    "uWSGI>=2.0.20",
+    "flask-migrate>=4.1.0",
+]
 
-[tool.poetry.dependencies]
-#apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "172edec65214ff00fcfd792e86ea46e3a7e60178" }
+[dependency-groups]
+dev = [
+    "boto3-stubs[ses]>=1.21.8",
+    "google-api-python-client-stubs>=1.11",
+    "google-auth-stubs>=0.1.0",
+    "mypy>=0.991",
+    "mypy-boto3>=1.21.8",
+    "pytest>=7.0",
+    "pylsp-mypy>=0.6",
+    "python-lsp-black>=1.0.1",
+    "python-lsp-jsonrpc>=1.0.0",
+    "python-lsp-server>=1.7",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.uv.sources]
 apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "ab290bbb329028976994958d7fee22c28b3b5f97" }
-boto3 = "^1.21.8"
-flask = "^2.0"
-# Fix for https://github.com/dtheodor/flask-sqlalchemy-session/issues/14
-flask-sqlalchemy-session = { git = "https://github.com/schettino72/flask-sqlalchemy-session.git", branch = "werkzeug21" }
-google-api-python-client = "^2.39"
-google-auth-httplib2 = "^0.1"
-google-auth-oauthlib = "^0.4.6"
-py-cord = "^2.0"
-python = "^3.10.2"
-#SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
-SQLAlchemy = "^2.0.1"
-alembic = "^1.7.6"
-typed-argument-parser = "^1.7.2"
-requests = "^2.27.1"
-python-dotenv = "^0.19.2"
-uWSGI = "^2.0.20"
-
-[tool.poetry.dev-dependencies]
-boto3-stubs = {extras = ["ses"], version = "^1.21.8"}
-google-api-python-client-stubs = "^1.11"
-google-auth-stubs = "^0.1.0"
-mypy = "^0.991"
-mypy-boto3 = "^1.21.8"
-pytest = "^7.0"
-pylsp-mypy = '^0.6'
-python-lsp-black = '^1.0.1'
-python-lsp-jsonrpc = '^1.0.0'
-python-lsp-server = '^1.7'
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+# apscheduler = { git = "https://github.com/agronholm/apscheduler.git", rev = "172edec65214ff00fcfd792e86ea46e3a7e60178" }
+# SQLAlchemy = { git = "https://github.com/sqlalchemy/sqlalchemy.git", rev = "03989d1" }
 
 [tool.black]
 line-length = 100
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

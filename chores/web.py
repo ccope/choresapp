@@ -5,18 +5,20 @@ from email.message import Message
 from textwrap import dedent
 from typing import Any, Dict, List
 
-from flask import Flask, Request, render_template, request, session
-from flask_sqlalchemy_session import current_session
+from flask import Flask, Request, render_template, request
 from sqlalchemy.sql import select, and_
-from sqlalchemy.orm import selectinload
 
 from chores.lib import get_assignees_sorted_by_count
-from chores.models.choresdb import Assignments, People, Tasks
+from chores.models.choresdb import Assignments, People, Tasks, AutoNags, db
 from chores.admin_routes import admin_bp
 
 template_dir = os.path.abspath("templates")
 fmt = "%a, %d %b %Y %H:%M:%S %z"
-app = Flask(__name__, template_folder=template_dir)
+app = Flask(
+    __name__,
+    template_folder=template_dir,
+    instance_path=os.path.join(os.getcwd(), "data"),
+)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 
@@ -29,14 +31,14 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
         obj = None
         if field == "chore":
             obj = (
-                current_session.execute(select(Tasks).where(Tasks.name == form_value))
+                db.session.execute(select(Tasks).where(Tasks.name == form_value))
                 .scalars()
                 .one()
             )
 
         if field == "name":
             obj = (
-                current_session.execute(select(People).where(People.name == form_value))
+                db.session.execute(select(People).where(People.name == form_value))
                 .scalars()
                 .one()
             )
@@ -52,7 +54,7 @@ def validate_web_form(form: Dict[str, str], fields: List[str]) -> Dict[str, Any]
             )
         )
         try:
-            assignment = current_session.execute(a_st).scalars().one()
+            assignment = db.session.execute(a_st).scalars().one()
             ret["assignment"] = assignment
         except Exception:
             raise ValueError("That person doesn't have to do that chore, dawg.")
@@ -80,8 +82,8 @@ app.register_blueprint(admin_bp)
 
 @app.route("/")
 def displaychores():
-    tasks = current_session.execute(select(Tasks.name)).scalars()
-    names = current_session.execute(select(People.name)).scalars()
+    tasks = db.session.execute(select(Tasks.name)).scalars()
+    names = db.session.execute(select(People.name)).scalars()
     return render_template("chores.html", chores=list(tasks), names=list(names))
 
 
@@ -92,7 +94,7 @@ def nag():
     except KeyError:
         raise ValueError("Bad form, SNOZZBALL.")
     task_obj = data["task"]
-    assignees = get_assignees_sorted_by_count(current_session, task_obj)
+    assignees = get_assignees_sorted_by_count(db.session, task_obj)
     person_obj = assignees[0].person
     emails = [p.person.email for p in assignees[1:]]
     msg = Message()
@@ -130,7 +132,7 @@ def done():
     task_obj = data["task"]
     assignment: Assignments = data["assignment"]
     assignment.counter += 1
-    current_session.commit()
+    db.session.commit()
     emails = [p.person.email for p in task_obj.people if p.person.email != person_obj.email]
     msg = Message()
     msg["Subject"] = "%s %sed. Thanks!" % (person_obj.name, task_obj.name)

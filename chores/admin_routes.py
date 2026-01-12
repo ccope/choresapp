@@ -4,12 +4,11 @@ from statistics import median
 from typing import Any, Dict
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy_session import current_session
 from sqlalchemy.sql import select, func
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 
-from chores.models.choresdb import Assignments, People, Tasks
+from chores.models.choresdb import Assignments, People, Tasks, db
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -22,7 +21,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_bp.route("/people")
 def list_people():
     """List all people."""
-    people = current_session.execute(
+    people = db.session.execute(
         select(People).order_by(People.name)
     ).scalars().all()
     return render_template("admin/people/list.html", people=people)
@@ -46,12 +45,12 @@ def create_person():
     
     try:
         person = People(name=name, email=email)
-        current_session.add(person)
-        current_session.commit()
+        db.session.add(person)
+        db.session.commit()
         flash(f"Person '{name}' created successfully", "success")
         return redirect(url_for("admin.list_people"))
     except IntegrityError:
-        current_session.rollback()
+        db.session.rollback()
         flash(f"Person with name '{name}' or email '{email}' already exists", "error")
         return redirect(url_for("admin.new_person"))
 
@@ -59,7 +58,7 @@ def create_person():
 @admin_bp.route("/people/<int:person_id>")
 def view_person(person_id: int):
     """View details of a specific person."""
-    person = current_session.execute(
+    person = db.session.execute(
         select(People)
         .options(selectinload(People.tasks).selectinload(Assignments.task))
         .where(People.id == person_id)
@@ -75,7 +74,7 @@ def view_person(person_id: int):
 @admin_bp.route("/people/<int:person_id>/edit")
 def edit_person(person_id: int):
     """Show form to edit a person."""
-    person = current_session.execute(
+    person = db.session.execute(
         select(People).where(People.id == person_id)
     ).scalar_one_or_none()
     
@@ -89,7 +88,7 @@ def edit_person(person_id: int):
 @admin_bp.route("/people/<int:person_id>/update", methods=["POST"])
 def update_person(person_id: int):
     """Update a person."""
-    person = current_session.execute(
+    person = db.session.execute(
         select(People).where(People.id == person_id)
     ).scalar_one_or_none()
     
@@ -107,11 +106,11 @@ def update_person(person_id: int):
     try:
         person.name = name
         person.email = email
-        current_session.commit()
+        db.session.commit()
         flash(f"Person '{name}' updated successfully", "success")
         return redirect(url_for("admin.view_person", person_id=person_id))
     except IntegrityError:
-        current_session.rollback()
+        db.session.rollback()
         flash(f"Person with name '{name}' or email '{email}' already exists", "error")
         return redirect(url_for("admin.edit_person", person_id=person_id))
 
@@ -119,7 +118,7 @@ def update_person(person_id: int):
 @admin_bp.route("/people/<int:person_id>/delete", methods=["POST"])
 def delete_person(person_id: int):
     """Delete a person."""
-    person = current_session.execute(
+    person = db.session.execute(
         select(People)
         .options(selectinload(People.tasks))
         .where(People.id == person_id)
@@ -139,8 +138,8 @@ def delete_person(person_id: int):
         return redirect(url_for("admin.view_person", person_id=person_id))
     
     name = person.name
-    current_session.delete(person)
-    current_session.commit()
+    db.session.delete(person)
+    db.session.commit()
     flash(f"Person '{name}' deleted successfully", "success")
     return redirect(url_for("admin.list_people"))
 
@@ -153,7 +152,7 @@ def delete_person(person_id: int):
 @admin_bp.route("/tasks")
 def list_tasks():
     """List all tasks."""
-    tasks = current_session.execute(
+    tasks = db.session.execute(
         select(Tasks).order_by(Tasks.name)
     ).scalars().all()
     return render_template("admin/tasks/list.html", tasks=tasks)
@@ -177,12 +176,12 @@ def create_task():
     
     try:
         task = Tasks(name=name, description=description)
-        current_session.add(task)
-        current_session.commit()
+        db.session.add(task)
+        db.session.commit()
         flash(f"Task '{name}' created successfully", "success")
         return redirect(url_for("admin.list_tasks"))
     except IntegrityError:
-        current_session.rollback()
+        db.session.rollback()
         flash(f"Task with name '{name}' already exists", "error")
         return redirect(url_for("admin.new_task"))
 
@@ -190,7 +189,7 @@ def create_task():
 @admin_bp.route("/tasks/<int:task_id>")
 def view_task(task_id: int):
     """View details of a specific task."""
-    task = current_session.execute(
+    task = db.session.execute(
         select(Tasks)
         .options(selectinload(Tasks.people).selectinload(Assignments.person))
         .where(Tasks.id == task_id)
@@ -206,7 +205,7 @@ def view_task(task_id: int):
 @admin_bp.route("/tasks/<int:task_id>/edit")
 def edit_task(task_id: int):
     """Show form to edit a task."""
-    task = current_session.execute(
+    task = db.session.execute(
         select(Tasks).where(Tasks.id == task_id)
     ).scalar_one_or_none()
     
@@ -220,7 +219,7 @@ def edit_task(task_id: int):
 @admin_bp.route("/tasks/<int:task_id>/update", methods=["POST"])
 def update_task(task_id: int):
     """Update a task."""
-    task = current_session.execute(
+    task = db.session.execute(
         select(Tasks).where(Tasks.id == task_id)
     ).scalar_one_or_none()
     
@@ -238,11 +237,11 @@ def update_task(task_id: int):
     try:
         task.name = name
         task.description = description
-        current_session.commit()
+        db.session.commit()
         flash(f"Task '{name}' updated successfully", "success")
         return redirect(url_for("admin.view_task", task_id=task_id))
     except IntegrityError:
-        current_session.rollback()
+        db.session.rollback()
         flash(f"Task with name '{name}' already exists", "error")
         return redirect(url_for("admin.edit_task", task_id=task_id))
 
@@ -250,7 +249,7 @@ def update_task(task_id: int):
 @admin_bp.route("/tasks/<int:task_id>/delete", methods=["POST"])
 def delete_task(task_id: int):
     """Delete a task."""
-    task = current_session.execute(
+    task = db.session.execute(
         select(Tasks)
         .options(selectinload(Tasks.people))
         .where(Tasks.id == task_id)
@@ -270,8 +269,8 @@ def delete_task(task_id: int):
         return redirect(url_for("admin.view_task", task_id=task_id))
     
     name = task.name
-    current_session.delete(task)
-    current_session.commit()
+    db.session.delete(task)
+    db.session.commit()
     flash(f"Task '{name}' deleted successfully", "success")
     return redirect(url_for("admin.list_tasks"))
 
@@ -284,7 +283,7 @@ def delete_task(task_id: int):
 @admin_bp.route("/assignments")
 def list_assignments():
     """List all assignments."""
-    assignments = current_session.execute(
+    assignments = db.session.execute(
         select(Assignments)
         .options(
             selectinload(Assignments.person),
@@ -298,10 +297,10 @@ def list_assignments():
 @admin_bp.route("/assignments/new")
 def new_assignment():
     """Show form to create a new assignment."""
-    people = current_session.execute(
+    people = db.session.execute(
         select(People).order_by(People.name)
     ).scalars().all()
-    tasks = current_session.execute(
+    tasks = db.session.execute(
         select(Tasks).order_by(Tasks.name)
     ).scalars().all()
     return render_template("admin/assignments/form.html", people=people, tasks=tasks)
@@ -325,10 +324,10 @@ def create_assignment():
         return redirect(url_for("admin.new_assignment"))
     
     # Check if person and task exist
-    person = current_session.execute(
+    person = db.session.execute(
         select(People).where(People.id == person_id)
     ).scalar_one_or_none()
-    task = current_session.execute(
+    task = db.session.execute(
         select(Tasks).where(Tasks.id == task_id)
     ).scalar_one_or_none()
     
@@ -337,7 +336,7 @@ def create_assignment():
         return redirect(url_for("admin.new_assignment"))
     
     # Check if assignment already exists
-    existing = current_session.execute(
+    existing = db.session.execute(
         select(Assignments).where(
             Assignments.people_id == person_id,
             Assignments.task_id == task_id
@@ -349,7 +348,7 @@ def create_assignment():
         return redirect(url_for("admin.new_assignment"))
     
     # Create assignment with counter set to median of existing assignees
-    existing_assignments = current_session.execute(
+    existing_assignments = db.session.execute(
         select(Assignments).where(Assignments.task_id == task_id)
     ).scalars().all()
     
@@ -358,8 +357,8 @@ def create_assignment():
         counter = int(median([a.counter for a in existing_assignments]))
     
     assignment = Assignments(people_id=person_id, task_id=task_id, counter=counter)
-    current_session.add(assignment)
-    current_session.commit()
+    db.session.add(assignment)
+    db.session.commit()
     flash(f"'{person.name}' assigned to '{task.name}' successfully", "success")
     return redirect(url_for("admin.list_assignments"))
 
@@ -367,7 +366,7 @@ def create_assignment():
 @admin_bp.route("/assignments/<int:task_id>/<int:people_id>")
 def view_assignment(task_id: int, people_id: int):
     """View details of a specific assignment."""
-    assignment = current_session.execute(
+    assignment = db.session.execute(
         select(Assignments)
         .options(
             selectinload(Assignments.person),
@@ -389,7 +388,7 @@ def view_assignment(task_id: int, people_id: int):
 @admin_bp.route("/assignments/<int:task_id>/<int:people_id>/delete", methods=["POST"])
 def delete_assignment(task_id: int, people_id: int):
     """Delete an assignment."""
-    assignment = current_session.execute(
+    assignment = db.session.execute(
         select(Assignments)
         .options(
             selectinload(Assignments.person),
@@ -407,8 +406,8 @@ def delete_assignment(task_id: int, people_id: int):
     
     person_name = assignment.person.name
     task_name = assignment.task.name
-    current_session.delete(assignment)
-    current_session.commit()
+    db.session.delete(assignment)
+    db.session.commit()
     flash(f"'{person_name}' unassigned from '{task_name}' successfully", "success")
     return redirect(url_for("admin.list_assignments"))
 
@@ -416,9 +415,9 @@ def delete_assignment(task_id: int, people_id: int):
 @admin_bp.route("/")
 def index():
     """Admin home page."""
-    people_count = current_session.execute(select(func.count(People.id))).scalar()
-    tasks_count = current_session.execute(select(func.count(Tasks.id))).scalar()
-    assignments_count = current_session.execute(select(func.count(Assignments.task_id))).scalar()
+    people_count = db.session.execute(select(func.count(People.id))).scalar()
+    tasks_count = db.session.execute(select(func.count(Tasks.id))).scalar()
+    assignments_count = db.session.execute(select(func.count(Assignments.task_id))).scalar()
     
     return render_template(
         "admin/index.html",
