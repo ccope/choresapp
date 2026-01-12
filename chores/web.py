@@ -5,17 +5,19 @@ from email.message import Message
 from textwrap import dedent
 from typing import Any, Dict, List
 
-from flask import Flask, Request, render_template, request
+from flask import Flask, Request, render_template, request, session
 from flask_sqlalchemy_session import current_session
 from sqlalchemy.sql import select, and_
 from sqlalchemy.orm import selectinload
 
 from chores.lib import get_assignees_sorted_by_count
 from chores.models.choresdb import Assignments, People, Tasks
+from chores.admin_routes import admin_bp
 
 template_dir = os.path.abspath("templates")
 fmt = "%a, %d %b %Y %H:%M:%S %z"
 app = Flask(__name__, template_folder=template_dir)
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-in-production")
 
 
 # TODO: Think about renaming... everything
@@ -71,6 +73,9 @@ class ProxiedRequest(Request):
 
 
 app.request_class = ProxiedRequest
+
+# Register admin blueprint
+app.register_blueprint(admin_bp)
 
 
 @app.route("/")

@@ -11,8 +11,8 @@ from chores.lib import get_assignment_leaderboard
 
 
 class Manager:
-    def __init__(self, engine: Engine):
-        self.engine = engine or create_engine(os.environ["DBURI"], echo=True, future=True)
+    def __init__(self, engine: Optional[Engine] = None):
+        self.engine = engine if engine else create_engine(os.environ["DBURI"], echo=True, future=True)
 
     def add_task(self, name: str, description: Optional[str] = None):
         if not description:
@@ -21,7 +21,7 @@ class Manager:
         with Session(self.engine) as session:
             tasks = session.execute(select(Tasks).where(Tasks.name == name)).fetchall()
             if len(tasks) > 0:
-                print("Task {} already exists, skpping".format(name))
+                print("Task {} already exists, skipping".format(name))
             else:
                 session.add(new_task)
                 session.commit()

@@ -22,4 +22,10 @@ def get_notification_provider(name: Optional[str]) -> NotificationProvider:
         from .discord_post import DiscordMessage
 
         return DiscordMessage()
+    elif name == "None" or not name:
+        # Dummy provider for testing
+        class DummyProvider(NotificationProvider):
+            def send(self, message: Message):
+                print(f"Dummy send: {message.get('Subject')}")
+        return DummyProvider()
     raise Exception("Invalid notification provider!")

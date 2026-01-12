@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin{% endblock %} - ChoresApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <h1 class="text-2xl font-bold">ChoresApp Admin</h1>
+                    <div class="hidden md:flex space-x-4">
+                        <a href="{{ url_for('admin.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Dashboard</a>
+                        <a href="{{ url_for('admin.list_people') }}" class="hover:bg-blue-700 px-3 py-2 rounded">People</a>
+                        <a href="{{ url_for('admin.list_tasks') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Tasks</a>
+                        <a href="{{ url_for('admin.list_assignments') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Assignments</a>
+                    </div>
+                </div>
+                <a href="{{ url_for('displaychores') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mx-auto px-4 mt-4">
+                {% for category, message in messages %}
+                    <div class="{% if category == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} border px-4 py-3 rounded relative mb-4" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p>&copy; 2026 ChoresApp. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>
