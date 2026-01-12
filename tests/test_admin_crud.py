@@ -13,6 +13,10 @@ def client():
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
     app.config["SECRET_KEY"] = "test-secret-key"
     
+    # Initialize db with the app if not already initialized
+    if "sqlalchemy" not in app.extensions:
+        db.init_app(app)
+    
     with app.test_client() as client:
         with app.app_context():
             db.create_all()
@@ -86,7 +90,7 @@ class TestPeopleCRUD:
         assert response.status_code == 200
         assert b"required" in response.data
     
-    def test_list_people(self, client, test_session):
+    def test_list_people(self, client):
         """Test listing all people."""
         # Add test people
         person1 = People(name="Alice", email="alice@example.com")
@@ -99,7 +103,7 @@ class TestPeopleCRUD:
         assert b"Alice" in response.data
         assert b"Bob" in response.data
     
-    def test_view_person(self, client, test_session):
+    def test_view_person(self, client):
         """Test viewing a person's details."""
         person = People(name="Charlie", email="charlie@example.com")
         db.session.add(person)
@@ -110,7 +114,7 @@ class TestPeopleCRUD:
         assert b"Charlie" in response.data
         assert b"charlie@example.com" in response.data
     
-    def test_update_person(self, client, test_session):
+    def test_update_person(self, client):
         """Test updating a person."""
         person = People(name="David", email="david@example.com")
         db.session.add(person)
@@ -128,7 +132,7 @@ class TestPeopleCRUD:
         assert person.name == "David Smith"
         assert person.email == "david.smith@example.com"
     
-    def test_delete_person_without_assignments(self, client, test_session):
+    def test_delete_person_without_assignments(self, client):
         """Test deleting a person without assignments."""
         person = People(name="Eve", email="eve@example.com")
         db.session.add(person)
@@ -142,7 +146,7 @@ class TestPeopleCRUD:
         person = db.session.query(People).filter_by(id=person_id).first()
         assert person is None
     
-    def test_delete_person_with_assignments(self, client, test_session):
+    def test_delete_person_with_assignments(self, client):
         """Test deleting a person who has assignments (should fail)."""
         # Create person, task, and assignment
         person = People(name="Frank", email="frank@example.com")
@@ -167,7 +171,7 @@ class TestPeopleCRUD:
 class TestTasksCRUD:
     """Test CRUD operations for Tasks."""
     
-    def test_add_task(self, client, test_session):
+    def test_add_task(self, client):
         """Test adding a new task."""
         response = client.post("/admin/tasks", data={
             "name": "Vacuum Living Room",
@@ -181,7 +185,7 @@ class TestTasksCRUD:
         assert task is not None
         assert task.description == "Vacuum the entire living room"
     
-    def test_add_task_duplicate_name(self, client, test_session):
+    def test_add_task_duplicate_name(self, client):
         """Test adding a task with duplicate name."""
         task = Tasks(name="Mop Floor", description="Mop the floor")
         db.session.add(task)
@@ -205,7 +209,7 @@ class TestTasksCRUD:
         assert response.status_code == 200
         assert b"required" in response.data
     
-    def test_add_task_without_description(self, client, test_session):
+    def test_add_task_without_description(self, client):
         """Test adding a task without description."""
         response = client.post("/admin/tasks", data={
             "name": "Simple Task",
@@ -219,7 +223,7 @@ class TestTasksCRUD:
         assert task is not None
         assert task.description == ""
     
-    def test_list_tasks(self, client, test_session):
+    def test_list_tasks(self, client):
         """Test listing all tasks."""
         task1 = Tasks(name="Task 1", description="Description 1")
         task2 = Tasks(name="Task 2", description="Description 2")
@@ -231,7 +235,7 @@ class TestTasksCRUD:
         assert b"Task 1" in response.data
         assert b"Task 2" in response.data
     
-    def test_view_task(self, client, test_session):
+    def test_view_task(self, client):
         """Test viewing a task's details."""
         task = Tasks(name="View Test Task", description="Test description")
         db.session.add(task)
@@ -242,7 +246,7 @@ class TestTasksCRUD:
         assert b"View Test Task" in response.data
         assert b"Test description" in response.data
     
-    def test_update_task(self, client, test_session):
+    def test_update_task(self, client):
         """Test updating a task."""
         task = Tasks(name="Old Task Name", description="Old description")
         db.session.add(task)
@@ -260,7 +264,7 @@ class TestTasksCRUD:
         assert task.name == "New Task Name"
         assert task.description == "New description"
     
-    def test_delete_task_without_assignments(self, client, test_session):
+    def test_delete_task_without_assignments(self, client):
         """Test deleting a task without assignments."""
         task = Tasks(name="Delete Me", description="To be deleted")
         db.session.add(task)
@@ -274,7 +278,7 @@ class TestTasksCRUD:
         task = db.session.query(Tasks).filter_by(id=task_id).first()
         assert task is None
     
-    def test_delete_task_with_assignments(self, client, test_session):
+    def test_delete_task_with_assignments(self, client):
         """Test deleting a task with assignments (should fail)."""
         person = People(name="George", email="george@example.com")
         task = Tasks(name="Important Task", description="Can't delete")
@@ -298,7 +302,7 @@ class TestTasksCRUD:
 class TestAssignmentsCRUD:
     """Test CRUD operations for Assignments."""
     
-    def test_create_assignment(self, client, test_session):
+    def test_create_assignment(self, client):
         """Test creating a new assignment."""
         person = People(name="Helen", email="helen@example.com")
         task = Tasks(name="Water Plants", description="Water all plants")
@@ -319,7 +323,7 @@ class TestAssignmentsCRUD:
         assert assignment is not None
         assert assignment.counter == 0
     
-    def test_create_assignment_with_existing_assignees(self, client, test_session):
+    def test_create_assignment_with_existing_assignees(self, client):
         """Test creating assignment when task already has assignees."""
         person1 = People(name="Ian", email="ian@example.com")
         person2 = People(name="Jack", email="jack@example.com")
@@ -347,7 +351,7 @@ class TestAssignmentsCRUD:
         assert assignment2 is not None
         assert assignment2.counter == 5  # Median of [5]
     
-    def test_create_duplicate_assignment(self, client, test_session):
+    def test_create_duplicate_assignment(self, client):
         """Test creating a duplicate assignment."""
         person = People(name="Kate", email="kate@example.com")
         task = Tasks(name="Take Trash", description="Take out trash")
@@ -367,7 +371,7 @@ class TestAssignmentsCRUD:
         assert response.status_code == 200
         assert b"already assigned" in response.data
     
-    def test_create_assignment_invalid_person(self, client, test_session):
+    def test_create_assignment_invalid_person(self, client):
         """Test creating assignment with invalid person ID."""
         task = Tasks(name="Some Task", description="Description")
         db.session.add(task)
@@ -381,7 +385,7 @@ class TestAssignmentsCRUD:
         assert response.status_code == 200
         assert b"not found" in response.data
     
-    def test_create_assignment_invalid_task(self, client, test_session):
+    def test_create_assignment_invalid_task(self, client):
         """Test creating assignment with invalid task ID."""
         person = People(name="Leo", email="leo@example.com")
         db.session.add(person)
@@ -395,7 +399,7 @@ class TestAssignmentsCRUD:
         assert response.status_code == 200
         assert b"not found" in response.data
     
-    def test_list_assignments(self, client, test_session):
+    def test_list_assignments(self, client):
         """Test listing all assignments."""
         person = People(name="Mary", email="mary@example.com")
         task = Tasks(name="Clean Bathroom", description="Clean bathroom")
@@ -411,7 +415,7 @@ class TestAssignmentsCRUD:
         assert b"Mary" in response.data
         assert b"Clean Bathroom" in response.data
     
-    def test_view_assignment(self, client, test_session):
+    def test_view_assignment(self, client):
         """Test viewing an assignment's details."""
         person = People(name="Nancy", email="nancy@example.com")
         task = Tasks(name="Wash Dishes", description="Wash all dishes")
@@ -428,7 +432,7 @@ class TestAssignmentsCRUD:
         assert b"Wash Dishes" in response.data
         assert b"7" in response.data
     
-    def test_delete_assignment(self, client, test_session):
+    def test_delete_assignment(self, client):
         """Test deleting an assignment."""
         person = People(name="Oscar", email="oscar@example.com")
         task = Tasks(name="Fold Laundry", description="Fold clean laundry")
@@ -448,7 +452,7 @@ class TestAssignmentsCRUD:
         ).first()
         assert assignment is None
     
-    def test_delete_assignment_allows_person_deletion(self, client, test_session):
+    def test_delete_assignment_allows_person_deletion(self, client):
         """Test that deleting assignment allows person to be deleted."""
         person = People(name="Paul", email="paul@example.com")
         task = Tasks(name="Some Chore", description="Do something")
@@ -475,7 +479,7 @@ class TestAssignmentsCRUD:
 class TestAdminDashboard:
     """Test admin dashboard."""
     
-    def test_admin_index(self, client, test_session):
+    def test_admin_index(self, client):
         """Test admin dashboard displays correct counts."""
         person = People(name="Quinn", email="quinn@example.com")
         task = Tasks(name="Task A", description="Description")
